@@ -5,7 +5,7 @@ Node.js + TypeScript + Fastify REST API for the AI Engineering / HR Copilot plat
 ## Prerequisites
 
 - Node.js 20+
-- MongoDB (local or Docker)
+- MongoDB (local install)
 
 ## Setup
 

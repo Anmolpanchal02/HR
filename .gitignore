@@ -33,9 +33,6 @@ coverage/
 # TypeScript
 *.tsbuildinfo
 
-# Docker
-.docker/
-
 # Document file storage
 backend/storage/
 storage/

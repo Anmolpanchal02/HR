@@ -88,7 +88,6 @@ ai-hr-copilot/
 ├── frontend/          # Next.js + TypeScript + Tailwind
 ├── backend/           # Fastify + TypeScript + Mongoose
 ├── docs/
-├── docker-compose.yml
 ├── .gitignore
 └── README.md
 ```
@@ -97,17 +96,13 @@ ai-hr-copilot/
 
 - Node.js 20+
 - npm
-- MongoDB (local or via Docker)
+- MongoDB (local install)
 
 ## Quick Start (Local Development)
 
 ### 1. Start MongoDB
 
-```bash
-docker compose up mongodb -d
-```
-
-Or run MongoDB locally on `mongodb://localhost:27017`.
+Run MongoDB locally on `mongodb://localhost:27017`.
 
 ### 2. Backend
 
@@ -360,16 +355,6 @@ User message → AgentService → LLM (tool choice)
 **Env:** `AGENT_MAX_TOOL_CALLS`, `RAG_TOP_K`, `RAG_MIN_SCORE`, `COPILOT_MAX_MESSAGE_LENGTH`
 
 Frontend: http://localhost:3000/copilot — shows concise tool activity summaries (✓ Found employee, ✓ Created task)
-
-## Docker (Full Stack)
-
-```bash
-docker compose up --build
-```
-
-- Frontend: http://localhost:3000
-- Backend: http://localhost:5000/api/v1
-- MongoDB: localhost:27017
 
 ## What's Next
 
