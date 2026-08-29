@@ -1,0 +1,10 @@
+process.env.NODE_ENV = "test";
+process.env.JWT_SECRET = "test-jwt-secret-minimum-32-characters-long";
+process.env.JWT_EXPIRES_IN = "1h";
+process.env.DOCUMENT_STORAGE_PATH = "./storage/test-documents";
+process.env.EMBEDDING_PROVIDER = "mock";
+process.env.VECTOR_SEARCH_MODE = "local";
+process.env.MAX_DOCUMENT_SIZE_MB = "10";
+process.env.LLM_PROVIDER = "mock";
+process.env.RAG_MIN_SCORE = "0.01";
+process.env.AGENT_MAX_TOOL_CALLS = "5";
