@@ -7,6 +7,8 @@ Node.js + TypeScript + Fastify REST API for the AI Engineering / HR Copilot plat
 - Node.js 20+
 - MongoDB (local install)
 
+jkdskjdjk
+
 ## Setup
 
 ```bash
