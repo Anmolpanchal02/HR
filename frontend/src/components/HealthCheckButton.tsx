@@ -20,8 +20,14 @@ export function HealthCheckButton() {
       const response = await checkHealth();
       setResult(response);
     } catch (err) {
-      const message =
+      let message =
         err instanceof ApiError ? err.message : "Unable to reach backend";
+
+      if (message.includes("404") || message.includes("Request failed")) {
+        message =
+          "Backend not reachable. On Vercel set BACKEND_URL to your Render API URL (e.g. https://xxx.onrender.com).";
+      }
+
       setError(message);
     } finally {
       setLoading(false);

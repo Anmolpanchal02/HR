@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import { getApiBaseUrl } from "@/lib/api/config";
 import type {
   ApiDataResponse,
   DocumentDetail,
@@ -49,6 +50,5 @@ export async function searchDocuments(
 }
 
 export function getDocumentDownloadUrl(id: string): string {
-  const base = process.env.NEXT_PUBLIC_API_URL ?? "";
-  return `${base}/documents/${id}/download`;
+  return `${getApiBaseUrl()}/documents/${id}/download`;
 }

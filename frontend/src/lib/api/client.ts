@@ -1,7 +1,8 @@
 import type { ApiErrorResponse } from "@/types/api";
+import { getApiBaseUrl } from "@/lib/api/config";
 import { getStoredToken } from "@/lib/auth/token-storage";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+const API_BASE_URL = getApiBaseUrl();
 
 class ApiError extends Error {
   constructor(
@@ -50,10 +51,6 @@ async function request<T>(
   options: RequestInit,
   includeAuth = false,
 ): Promise<T> {
-  if (!API_BASE_URL) {
-    throw new ApiError("NEXT_PUBLIC_API_URL is not configured");
-  }
-
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
@@ -108,10 +105,6 @@ export const apiClient = {
     includeAuth = false,
     onProgress?: (percent: number) => void,
   ): Promise<T> {
-    if (!API_BASE_URL) {
-      throw new ApiError("NEXT_PUBLIC_API_URL is not configured");
-    }
-
     if (!onProgress) {
       const response = await fetch(`${API_BASE_URL}${path}`, {
         method: "POST",
