@@ -28,6 +28,13 @@ API runs at `http://localhost:5001` (local dev).
 curl http://localhost:5001/api/v1/health
 ```
 
+## Deploy (Render)
+
+- **Root Directory:** `backend`
+- **Build:** `npm install --include=dev && npm run build`
+- **Start:** `npm start`
+- Set `MONGODB_URI`, `JWT_SECRET`, `CORS_ORIGIN`, and LLM keys in the Render dashboard.
+
 ## Scripts
 
 | Script  | Description              |
