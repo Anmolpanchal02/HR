@@ -23,10 +23,10 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen bg-zinc-50">
-        <div className="hidden w-[var(--sidebar-width)] border-r border-zinc-200 bg-white lg:block" />
+      <div className="flex min-h-screen bg-background">
+        <div className="hidden w-[var(--sidebar-width)] bg-sidebar lg:block" />
         <div className="flex flex-1 flex-col">
-          <div className="h-14 border-b border-zinc-200 bg-white" />
+          <div className="h-14 border-b border-border bg-surface/80" />
           <div className="flex-1 p-6">
             <PageSkeleton />
           </div>
@@ -38,7 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="flex min-h-screen bg-zinc-50">
+    <div className="flex min-h-screen bg-background">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onMenuClick={() => setSidebarOpen(true)} />

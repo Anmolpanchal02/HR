@@ -33,6 +33,6 @@ coverage/
 # TypeScript
 *.tsbuildinfo
 
-# Document file storage
+# Uploaded document binaries (not TypeScript under src/**/storage/)
 backend/storage/
-storage/
+/storage/

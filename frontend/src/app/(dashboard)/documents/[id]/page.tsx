@@ -72,16 +72,16 @@ export default function DocumentDetailPage() {
 
   if (isLoading || loading) {
     return (
-      <div className="flex min-h-full items-center justify-center bg-zinc-50">
-        <p className="text-sm text-zinc-600">Loading document...</p>
+      <div className="flex min-h-full items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading document...</p>
       </div>
     );
   }
 
   if (error || !document) {
     return (
-      <div className="flex min-h-full flex-col items-center justify-center bg-zinc-50 px-6">
-        <p className="text-sm text-red-600">{error ?? "Document not found"}</p>
+      <div className="flex min-h-full flex-col items-center justify-center bg-background px-6">
+        <p className="text-sm text-destructive">{error ?? "Document not found"}</p>
         <Link href="/documents" className="mt-4 text-sm underline">
           Back to documents
         </Link>
@@ -92,58 +92,58 @@ export default function DocumentDetailPage() {
   const canArchive = user ? canArchiveDocuments(user.role) : false;
 
   return (
-    <div className="min-h-full bg-zinc-50 px-6 py-16">
+    <div className="min-h-full bg-background px-6 py-16">
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6">
-        <Link href="/documents" className="text-sm text-zinc-700 underline">
+        <Link href="/documents" className="text-sm text-foreground underline">
           Back to documents
         </Link>
 
-        <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h1 className="text-2xl font-semibold text-zinc-900">{document.name}</h1>
+        <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+          <h1 className="text-2xl font-semibold text-foreground">{document.name}</h1>
           <dl className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-zinc-500">Type</dt>
-              <dd className="font-medium text-zinc-900">{mimeTypeLabel(document.mimeType)}</dd>
+              <dt className="text-muted-foreground">Type</dt>
+              <dd className="font-medium text-foreground">{mimeTypeLabel(document.mimeType)}</dd>
             </div>
             <div>
-              <dt className="text-zinc-500">Size</dt>
-              <dd className="font-medium text-zinc-900">{formatFileSize(document.size)}</dd>
+              <dt className="text-muted-foreground">Size</dt>
+              <dd className="font-medium text-foreground">{formatFileSize(document.size)}</dd>
             </div>
             <div>
-              <dt className="text-zinc-500">Status</dt>
-              <dd className="font-medium text-zinc-900">{document.status.replace(/_/g, " ")}</dd>
+              <dt className="text-muted-foreground">Status</dt>
+              <dd className="font-medium text-foreground">{document.status.replace(/_/g, " ")}</dd>
             </div>
             <div>
-              <dt className="text-zinc-500">Uploaded by</dt>
-              <dd className="font-medium text-zinc-900">{document.uploadedBy?.name ?? "—"}</dd>
+              <dt className="text-muted-foreground">Uploaded by</dt>
+              <dd className="font-medium text-foreground">{document.uploadedBy?.name ?? "—"}</dd>
             </div>
             <div>
-              <dt className="text-zinc-500">Created</dt>
-              <dd className="font-medium text-zinc-900">
+              <dt className="text-muted-foreground">Created</dt>
+              <dd className="font-medium text-foreground">
                 {new Date(document.createdAt).toLocaleString()}
               </dd>
             </div>
             <div>
-              <dt className="text-zinc-500">Version</dt>
-              <dd className="font-medium text-zinc-900">{document.version}</dd>
+              <dt className="text-muted-foreground">Version</dt>
+              <dd className="font-medium text-foreground">{document.version}</dd>
             </div>
           </dl>
 
-          <div className="mt-6 rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-            <h2 className="text-sm font-medium text-zinc-700">Processing status</h2>
+          <div className="mt-6 rounded-lg border border-border bg-background p-4">
+            <h2 className="text-sm font-medium text-foreground">Processing status</h2>
             {document.status === "PROCESSING" && (
-              <p className="mt-2 text-sm text-amber-700">Document is being processed...</p>
+              <p className="mt-2 text-sm text-warning">Document is being processed...</p>
             )}
             {document.status === "FAILED" && (
-              <p className="mt-2 text-sm text-red-600">
+              <p className="mt-2 text-sm text-destructive">
                 {document.processingError ?? "Processing failed"}
               </p>
             )}
             {document.status === "READY" && (
-              <p className="mt-2 text-sm text-green-700">Document is searchable</p>
+              <p className="mt-2 text-sm text-success">Document is searchable</p>
             )}
             {document.status === "UPLOADED" && (
-              <p className="mt-2 text-sm text-zinc-600">Waiting to process...</p>
+              <p className="mt-2 text-sm text-muted-foreground">Waiting to process...</p>
             )}
           </div>
 
@@ -151,7 +151,7 @@ export default function DocumentDetailPage() {
             <button
               type="button"
               onClick={() => void handleDownload()}
-              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+              className="rounded-lg border border-border-strong px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted"
             >
               Download
             </button>
@@ -159,7 +159,7 @@ export default function DocumentDetailPage() {
               <button
                 type="button"
                 onClick={() => void handleArchive()}
-                className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+                className="rounded-lg border border-destructive/40 px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive-soft"
               >
                 Archive
               </button>

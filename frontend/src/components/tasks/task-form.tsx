@@ -93,7 +93,7 @@ export function TaskForm({ onCreated, defaultProjectId, defaultOpen = false, onC
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+        className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
       >
         + New Task
       </button>
@@ -103,16 +103,16 @@ export function TaskForm({ onCreated, defaultProjectId, defaultOpen = false, onC
   return (
     <form
       onSubmit={(e) => void handleSubmit(e)}
-      className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
+      className="rounded-xl border border-border bg-surface p-4 shadow-sm"
     >
-      <h2 className="text-lg font-medium text-zinc-900">Create task</h2>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      <h2 className="text-lg font-medium text-foreground">Create task</h2>
+      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <select
           required
           value={form.projectId}
           onChange={(e) => setForm((f) => ({ ...f, projectId: e.target.value }))}
-          className="sm:col-span-2 rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="sm:col-span-2 rounded-lg border border-border-strong px-3 py-2 text-sm"
         >
           <option value="">Select project</option>
           {projects.map((p) => (
@@ -124,19 +124,19 @@ export function TaskForm({ onCreated, defaultProjectId, defaultOpen = false, onC
           placeholder="Task title"
           value={form.title}
           onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-          className="sm:col-span-2 rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="sm:col-span-2 rounded-lg border border-border-strong px-3 py-2 text-sm"
         />
         <textarea
           placeholder="Description"
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-          className="sm:col-span-2 rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="sm:col-span-2 rounded-lg border border-border-strong px-3 py-2 text-sm"
           rows={2}
         />
         <select
           value={form.priority}
           onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value as TaskPriority }))}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
         >
           {(["LOW", "MEDIUM", "HIGH", "CRITICAL"] as TaskPriority[]).map((p) => (
             <option key={p} value={p}>{p}</option>
@@ -146,12 +146,12 @@ export function TaskForm({ onCreated, defaultProjectId, defaultOpen = false, onC
           type="date"
           value={form.dueDate}
           onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
         />
         <select
           value={form.assigneeId}
           onChange={(e) => setForm((f) => ({ ...f, assigneeId: e.target.value }))}
-          className="sm:col-span-2 rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="sm:col-span-2 rounded-lg border border-border-strong px-3 py-2 text-sm"
         >
           <option value="">Select assignee (optional)</option>
           {assignees.map((a) => (
@@ -163,7 +163,7 @@ export function TaskForm({ onCreated, defaultProjectId, defaultOpen = false, onC
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {loading ? "Creating..." : "Create"}
         </button>
@@ -173,7 +173,7 @@ export function TaskForm({ onCreated, defaultProjectId, defaultOpen = false, onC
             setOpen(false);
             onCancel?.();
           }}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-4 py-2 text-sm"
         >
           Cancel
         </button>

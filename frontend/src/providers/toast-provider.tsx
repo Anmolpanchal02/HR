@@ -50,9 +50,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={t.id}
             className={cn(
               "pointer-events-auto rounded-lg px-4 py-3 text-sm font-medium shadow-md",
-              t.variant === "success" && "bg-emerald-600 text-white",
-              t.variant === "error" && "bg-red-600 text-white",
-              t.variant === "info" && "bg-zinc-900 text-white",
+              t.variant === "success" && "bg-success text-white",
+              t.variant === "error" && "bg-destructive text-white",
+              t.variant === "info" && "bg-primary text-primary-foreground",
             )}
           >
             {t.message}

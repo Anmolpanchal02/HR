@@ -52,24 +52,24 @@ export function TaskFilters({
   onApply,
 }: TaskFiltersProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+    <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 shadow-sm">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-zinc-600">Search</label>
+          <label className="text-xs font-medium text-muted-foreground">Search</label>
           <input
             type="text"
             placeholder="Search tasks..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-zinc-600">Project</label>
+          <label className="text-xs font-medium text-muted-foreground">Project</label>
           <select
             value={projectId}
             onChange={(e) => onProjectChange(e.target.value)}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
           >
             <option value="">All projects</option>
             {projects.map((p) => (
@@ -80,11 +80,11 @@ export function TaskFilters({
           </select>
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-zinc-600">Assignee</label>
+          <label className="text-xs font-medium text-muted-foreground">Assignee</label>
           <select
             value={assigneeId}
             onChange={(e) => onAssigneeChange(e.target.value)}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
           >
             <option value="">All assignees</option>
             {assignees.map((a) => (
@@ -93,11 +93,11 @@ export function TaskFilters({
           </select>
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-zinc-600">Status</label>
+          <label className="text-xs font-medium text-muted-foreground">Status</label>
           <select
             value={status}
             onChange={(e) => onStatusChange(e.target.value as TaskStatus | "")}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
           >
             {STATUS_OPTIONS.map((option) => (
               <option key={option || "all"} value={option}>
@@ -107,11 +107,11 @@ export function TaskFilters({
           </select>
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-zinc-600">Priority</label>
+          <label className="text-xs font-medium text-muted-foreground">Priority</label>
           <select
             value={priority}
             onChange={(e) => onPriorityChange(e.target.value as TaskPriority | "")}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
           >
             {PRIORITY_OPTIONS.map((option) => (
               <option key={option || "all"} value={option}>
@@ -124,7 +124,7 @@ export function TaskFilters({
       <button
         type="button"
         onClick={onApply}
-        className="self-start rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+        className="self-start rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
       >
         Apply
       </button>

@@ -1,35 +1,41 @@
 import Link from "next/link";
 
 import { HealthCheckButton } from "@/components/HealthCheckButton";
+import { BrandMark } from "@/components/layout/brand-mark";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function Home() {
   return (
-    <div className="flex min-h-full flex-col items-center justify-center bg-zinc-50 px-6 py-16">
+    <div className="auth-mesh relative flex min-h-full flex-col items-center justify-center px-6 py-16">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle compact />
+      </div>
       <main className="flex w-full max-w-2xl flex-col items-center gap-8 text-center">
+        <BrandMark compact />
         <div className="space-y-3">
-          <h1 className="text-4xl font-semibold tracking-tight text-zinc-900">
+          <h1 className="text-4xl font-semibold tracking-tight text-foreground">
             AI Engineering / HR Copilot
           </h1>
-          <p className="text-base text-zinc-600">
-            Production-oriented foundation for HR operations and AI-assisted
-            engineering workflows.
+          <p className="mx-auto max-w-lg text-base leading-relaxed text-muted-foreground">
+            One workspace for people, projects, and knowledge — with an AI agent that can look things
+            up and take action.
           </p>
         </div>
 
         <HealthCheckButton />
 
-        <div className="flex gap-4 text-sm font-medium">
+        <div className="flex gap-3 text-sm font-medium">
           <Link
             href="/login"
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-zinc-700 hover:bg-zinc-100"
+            className="rounded-xl border border-border bg-surface px-5 py-2.5 text-foreground shadow-sm hover:bg-background"
           >
-            Login
+            Sign in
           </Link>
           <Link
             href="/register"
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-white hover:bg-zinc-700"
+            className="rounded-xl bg-primary px-5 py-2.5 text-white shadow-sm shadow-primary/20 hover:bg-primary-hover"
           >
-            Register
+            Get started
           </Link>
         </div>
       </main>

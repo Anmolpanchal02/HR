@@ -90,7 +90,7 @@ export default function DocumentsPage() {
       )}
 
       <Card padding="sm">
-        <p className="mb-2 text-xs font-medium text-zinc-600">Semantic search</p>
+        <p className="mb-2 text-xs font-medium text-muted-foreground">Semantic search</p>
         <div className="flex gap-2">
           <Input
             placeholder="e.g. leave policy"
@@ -117,23 +117,23 @@ export default function DocumentsPage() {
 
       {searchResults && (
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-zinc-900">Semantic search results</h2>
+          <h2 className="mb-3 text-sm font-semibold text-foreground">Semantic search results</h2>
           {searchResults.length === 0 ? (
-            <p className="text-sm text-zinc-500">No matching content found.</p>
+            <p className="text-sm text-muted-foreground">No matching content found.</p>
           ) : (
             <div className="space-y-3">
               {searchResults.map((result) => (
-                <div key={result.chunkId} className="rounded-lg border border-zinc-100 p-3">
+                <div key={result.chunkId} className="rounded-lg border border-border p-3">
                   <div className="flex items-center justify-between gap-2">
                     <Link
                       href={`/documents/${result.documentId}`}
-                      className="text-sm font-medium text-zinc-900 hover:underline"
+                      className="text-sm font-medium text-foreground hover:underline"
                     >
                       {result.documentName}
                     </Link>
-                    <span className="text-xs text-zinc-500">Score: {result.score.toFixed(2)}</span>
+                    <span className="text-xs text-muted-foreground">Score: {result.score.toFixed(2)}</span>
                   </div>
-                  <p className="mt-2 line-clamp-3 text-sm text-zinc-600">{result.content}</p>
+                  <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">{result.content}</p>
                 </div>
               ))}
             </div>

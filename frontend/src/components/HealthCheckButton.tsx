@@ -34,22 +34,22 @@ export function HealthCheckButton() {
         type="button"
         onClick={handleCheckHealth}
         disabled={loading}
-        className="rounded-lg bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="rounded-xl bg-primary px-6 py-3 text-sm font-medium text-white shadow-sm shadow-primary/20 transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Checking..." : "Check Backend Health"}
       </button>
 
       {result && (
-        <div className="w-full rounded-lg border border-green-200 bg-green-50 p-4 text-left text-sm text-green-900">
+        <div className="w-full rounded-lg border border-success/30 bg-success-soft p-4 text-left text-sm text-success-foreground">
           <p className="font-medium">{result.message}</p>
-          <p className="mt-1 text-green-700">{result.timestamp}</p>
+          <p className="mt-1 text-success">{result.timestamp}</p>
         </div>
       )}
 
       {error && (
-        <div className="w-full rounded-lg border border-red-200 bg-red-50 p-4 text-left text-sm text-red-900">
+        <div className="w-full rounded-lg border border-destructive/30 bg-destructive-soft p-4 text-left text-sm text-destructive-foreground">
           <p className="font-medium">Backend unreachable</p>
-          <p className="mt-1 text-red-700">{error}</p>
+          <p className="mt-1 text-destructive">{error}</p>
         </div>
       )}
     </div>

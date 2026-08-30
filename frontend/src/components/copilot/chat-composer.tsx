@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 
 import { IconSend } from "@/components/icons";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface ChatComposerProps {
@@ -21,9 +20,10 @@ export function ChatComposer({
   onSend,
   disabled,
   loading,
-  placeholder = "Ask anything about your organization...",
+  placeholder = "Message Copilot…",
 }: ChatComposerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const canSend = !disabled && !loading && Boolean(value.trim());
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -35,42 +35,60 @@ export function ChatComposer({
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (!disabled && !loading && value.trim()) onSend();
+      if (canSend) onSend();
     }
   }
 
   return (
-    <div className="border-t border-zinc-200 bg-white p-3 md:p-4">
-      <div className="flex items-end gap-2 rounded-xl border border-zinc-200 bg-zinc-50 p-2 focus-within:border-zinc-300 focus-within:ring-2 focus-within:ring-zinc-100">
-        <textarea
-          ref={textareaRef}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          disabled={disabled || loading}
-          rows={1}
+    <div className="bg-gradient-to-t from-background via-background/95 to-transparent px-3 pb-3 pt-2 md:px-6 md:pb-5">
+      <div className="mx-auto max-w-3xl">
+        <div
           className={cn(
-            "max-h-40 min-h-[40px] flex-1 resize-none bg-transparent px-2 py-2 text-sm text-zinc-900",
-            "placeholder:text-zinc-400 focus:outline-none disabled:opacity-50",
+            "flex items-end gap-2 rounded-2xl border border-border bg-surface p-2 shadow-sm",
+            "focus-within:border-ring focus-within:ring-4 focus-within:ring-ring/15",
           )}
-          aria-label="Message input"
-        />
-        <Button
-          size="sm"
-          onClick={onSend}
-          disabled={disabled || loading || !value.trim()}
-          loading={loading}
-          aria-label="Send message"
-          className="shrink-0"
         >
-          <IconSend />
-          <span className="hidden sm:inline">Send</span>
-        </Button>
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            disabled={disabled || loading}
+            rows={1}
+            className={cn(
+              "max-h-40 min-h-[44px] flex-1 resize-none bg-transparent px-3 py-2.5 text-sm text-foreground",
+              "placeholder:text-subtle-foreground focus:outline-none disabled:opacity-50",
+            )}
+            aria-label="Message input"
+          />
+          <button
+            type="button"
+            onClick={onSend}
+            disabled={!canSend}
+            aria-label="Send message"
+            className={cn(
+              "mb-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors",
+              canSend
+                ? "bg-primary text-primary-foreground hover:bg-primary-hover"
+                : "bg-surface-muted text-subtle-foreground",
+              loading && "opacity-70",
+            )}
+          >
+            {loading ? (
+              <span
+                className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+                aria-hidden
+              />
+            ) : (
+              <IconSend className="h-4 w-4" />
+            )}
+          </button>
+        </div>
+        <p className="mt-2 hidden text-center text-[11px] text-subtle-foreground sm:block">
+          Enter to send · Shift + Enter for a new line
+        </p>
       </div>
-      <p className="mt-1.5 hidden text-xs text-zinc-400 sm:block">
-        Enter to send · Shift + Enter for new line
-      </p>
     </div>
   );
 }

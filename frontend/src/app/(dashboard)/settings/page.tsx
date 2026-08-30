@@ -3,6 +3,7 @@
 import { Card, CardHeader } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { RoleBadge } from "@/components/ui/badge";
+import { ThemePreferenceButtons } from "@/components/ui/theme-toggle";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function SettingsPage() {
@@ -21,15 +22,15 @@ export default function SettingsPage() {
           <CardHeader title="Profile" description="Your account information" />
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between gap-4">
-              <dt className="text-zinc-500">Name</dt>
-              <dd className="font-medium text-zinc-900">{user.name}</dd>
+              <dt className="text-muted-foreground">Name</dt>
+              <dd className="font-medium text-foreground">{user.name}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-zinc-500">Email</dt>
-              <dd className="font-medium text-zinc-900">{user.email}</dd>
+              <dt className="text-muted-foreground">Email</dt>
+              <dd className="font-medium text-foreground">{user.email}</dd>
             </div>
             <div className="flex items-center justify-between gap-4">
-              <dt className="text-zinc-500">Role</dt>
+              <dt className="text-muted-foreground">Role</dt>
               <dd>
                 <RoleBadge role={user.role} />
               </dd>
@@ -41,8 +42,8 @@ export default function SettingsPage() {
           <CardHeader title="Organization" description="Your workspace" />
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between gap-4">
-              <dt className="text-zinc-500">Organization</dt>
-              <dd className="font-medium text-zinc-900">
+              <dt className="text-muted-foreground">Organization</dt>
+              <dd className="font-medium text-foreground">
                 {user.organizationName ?? user.organizationId}
               </dd>
             </div>
@@ -50,19 +51,30 @@ export default function SettingsPage() {
         </Card>
 
         <Card>
-          <CardHeader title="GitHub Integration" description="Connect repositories for engineering insights" />
-          <p className="text-sm text-zinc-500">
+          <CardHeader
+            title="Appearance"
+            description="Choose light, dark, or match your system setting"
+          />
+          <ThemePreferenceButtons />
+        </Card>
+
+        <Card>
+          <CardHeader
+            title="GitHub Integration"
+            description="Connect repositories for engineering insights"
+          />
+          <p className="text-sm text-muted-foreground">
             GitHub integration is not yet configured. This will be available in a future release.
           </p>
         </Card>
 
         <Card>
           <CardHeader title="AI Settings" description="Copilot and document search preferences" />
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-muted-foreground">
             AI provider and model settings are managed by your organization administrator.
           </p>
           {isAdmin && (
-            <p className="mt-2 text-xs text-zinc-400">
+            <p className="mt-2 text-xs text-subtle-foreground">
               Admin: configure LLM_PROVIDER and related settings in backend environment variables.
             </p>
           )}

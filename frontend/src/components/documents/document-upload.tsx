@@ -80,16 +80,16 @@ export function DocumentUpload({ onUploaded }: DocumentUploadProps) {
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         className={`rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
-          dragging ? "border-zinc-900 bg-zinc-50" : "border-zinc-300 bg-white"
+          dragging ? "border-primary bg-background" : "border-border-strong bg-surface"
         }`}
       >
-        <p className="text-sm text-zinc-700">Drag & drop a document here</p>
-        <p className="mt-1 text-xs text-zinc-500">PDF, DOCX, or TXT — max {MAX_SIZE_MB} MB</p>
+        <p className="text-sm text-foreground">Drag & drop a document here</p>
+        <p className="mt-1 text-xs text-muted-foreground">PDF, DOCX, or TXT — max {MAX_SIZE_MB} MB</p>
         <button
           type="button"
           disabled={uploading}
           onClick={() => inputRef.current?.click()}
-          className="mt-4 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+          className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {uploading ? "Uploading..." : "Choose File"}
         </button>
@@ -104,18 +104,18 @@ export function DocumentUpload({ onUploaded }: DocumentUploadProps) {
 
       {uploading && (
         <div className="space-y-1">
-          <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
+          <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
             <div
-              className="h-full bg-zinc-900 transition-all"
+              className="h-full bg-primary transition-all"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-xs text-zinc-500">{progress}% uploaded</p>
+          <p className="text-xs text-muted-foreground">{progress}% uploaded</p>
         </div>
       )}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {success && <p className="text-sm text-green-700">{success}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      {success && <p className="text-sm text-success">{success}</p>}
     </div>
   );
 }

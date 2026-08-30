@@ -12,14 +12,17 @@ interface CitationCardProps {
 export function CitationCard({ citation }: CitationCardProps) {
   const label = formatCitationLabel(citation);
   const href = `/documents/${citation.documentId}`;
+  const subtitle = label.replace(`${citation.documentName} — `, "");
 
   return (
     <Link
       href={href}
-      className="block rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 transition-colors hover:border-zinc-300 hover:bg-white"
+      className="block rounded-xl border border-border bg-background/80 px-3 py-2.5 transition-colors hover:border-border-strong hover:bg-surface"
     >
-      <p className="text-xs font-medium text-zinc-900">{citation.documentName}</p>
-      <p className="mt-0.5 text-xs text-zinc-500">{label.replace(`${citation.documentName} — `, "")}</p>
+      <p className="truncate text-xs font-medium text-foreground">{citation.documentName}</p>
+      {subtitle !== citation.documentName && (
+        <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{subtitle}</p>
+      )}
     </Link>
   );
 }
@@ -32,8 +35,10 @@ export function CitationCards({ citations }: CitationListProps) {
   if (citations.length === 0) return null;
 
   return (
-    <div className="mt-3 border-t border-zinc-100 pt-3">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Sources</p>
+    <div className="mt-4">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-subtle-foreground">
+        Sources
+      </p>
       <div className="grid gap-2 sm:grid-cols-2">
         {citations.map((citation) => (
           <CitationCard key={citation.chunkId} citation={citation} />

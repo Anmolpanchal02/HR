@@ -350,7 +350,11 @@ User message → AgentService → LLM (tool choice)
 
 **Agent loop:** bounded by `AGENT_MAX_TOOL_CALLS` (default `5`). Runs logged in `AgentRun` model (`RUNNING`, `COMPLETED`, `FAILED`, `LIMIT_REACHED`).
 
-**LLM:** `LLM_PROVIDER=mock|openai`, default model `gpt-4o-mini`
+**LLM:** `LLM_PROVIDER=mock|groq|openai`
+
+- **`mock`** — free, local rule-based agent (limited English patterns)
+- **`groq`** — free cloud LLM (recommended): get a key at [console.groq.com/keys](https://console.groq.com/keys), set `LLM_API_KEY` (or `GROQ_API_KEY`), model `openai/gpt-oss-20b` (also works: `openai/gpt-oss-120b`, `qwen/qwen3.8-27b`)
+- **`openai`** — paid ChatGPT API
 
 **Env:** `AGENT_MAX_TOOL_CALLS`, `RAG_TOP_K`, `RAG_MIN_SCORE`, `COPILOT_MAX_MESSAGE_LENGTH`
 

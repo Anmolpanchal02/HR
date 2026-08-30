@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import Link from "next/link";
 
 import { PriorityBadge, StatusBadge } from "@/components/ui/badge";
@@ -18,9 +16,9 @@ export function ProjectTable({ projects }: ProjectTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-2xl border border-border bg-surface shadow-sm">
       <table className="w-full min-w-[640px] text-left text-sm">
-        <thead className="border-b border-zinc-200 bg-zinc-50 text-xs uppercase tracking-wide text-zinc-500">
+        <thead className="border-b border-border bg-surface-muted text-xs uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-4 py-3 font-medium">Project</th>
             <th className="px-4 py-3 font-medium">Key</th>
@@ -31,14 +29,20 @@ export function ProjectTable({ projects }: ProjectTableProps) {
         </thead>
         <tbody>
           {projects.map((project) => (
-            <tr key={project.id} className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50/50">
+            <tr
+              key={project.id}
+              className="border-b border-border last:border-0 hover:bg-background/60"
+            >
               <td className="px-4 py-3">
-                <Link href={`/projects/${project.id}`} className="font-medium text-zinc-900 hover:underline">
+                <Link
+                  href={`/projects/${project.id}`}
+                  className="font-medium text-foreground hover:text-primary"
+                >
                   {project.name}
                 </Link>
               </td>
-              <td className="px-4 py-3 font-mono text-xs text-zinc-600">{project.key}</td>
-              <td className="px-4 py-3 text-zinc-700">{project.owner?.name ?? "—"}</td>
+              <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{project.key}</td>
+              <td className="px-4 py-3 text-foreground">{project.owner?.name ?? "—"}</td>
               <td className="px-4 py-3">
                 <StatusBadge status={project.status} />
               </td>

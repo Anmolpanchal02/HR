@@ -5,12 +5,12 @@ type ButtonSize = "sm" | "md" | "lg";
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-zinc-900 text-white hover:bg-zinc-800 focus-visible:ring-zinc-900 disabled:bg-zinc-400",
+    "bg-primary text-primary-foreground hover:bg-primary-hover focus-visible:ring-ring disabled:opacity-50 shadow-sm",
   secondary:
-    "border border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50 focus-visible:ring-zinc-400",
-  ghost: "text-zinc-700 hover:bg-zinc-100 focus-visible:ring-zinc-400",
+    "border border-border bg-surface text-foreground hover:bg-surface-muted focus-visible:ring-ring",
+  ghost: "text-foreground hover:bg-surface-muted focus-visible:ring-ring",
   danger:
-    "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600 disabled:bg-red-300",
+    "bg-destructive text-white hover:opacity-90 focus-visible:ring-destructive disabled:opacity-50",
 };
 
 const sizes: Record<ButtonSize, string> = {
@@ -38,9 +38,9 @@ export function Button({
     <button
       type="button"
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-        "disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "disabled:cursor-not-allowed",
         variants[variant],
         sizes[size],
         className,

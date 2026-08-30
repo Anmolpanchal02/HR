@@ -41,7 +41,8 @@ export const env = {
 
   llmProvider: process.env.LLM_PROVIDER ?? "mock",
   llmModel: process.env.LLM_MODEL ?? "gpt-4o-mini",
-  llmApiKey: process.env.LLM_API_KEY,
+  /** OpenAI, Groq, etc. Prefer LLM_API_KEY; GROQ_API_KEY also accepted for Groq. */
+  llmApiKey: process.env.LLM_API_KEY ?? process.env.GROQ_API_KEY,
   copilotMaxMessageLength: parsePositiveInt(process.env.COPILOT_MAX_MESSAGE_LENGTH, 4000),
   agentMaxToolCalls: parsePositiveInt(process.env.AGENT_MAX_TOOL_CALLS, 5),
 } as const;

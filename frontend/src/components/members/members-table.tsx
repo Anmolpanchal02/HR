@@ -46,16 +46,16 @@ export function MembersTable({ members, currentUserRole, onUpdated }: MembersTab
 
   if (members.length === 0) {
     return (
-      <p className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-600">
+      <p className="rounded-xl border border-border bg-surface p-6 text-sm text-muted-foreground">
         No members found yet.
       </p>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
       <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-zinc-200 bg-zinc-50 text-zinc-600">
+        <thead className="border-b border-border bg-surface-muted text-muted-foreground">
           <tr>
             <th className="px-4 py-3 font-medium">Name</th>
             <th className="px-4 py-3 font-medium">Email</th>
@@ -66,16 +66,16 @@ export function MembersTable({ members, currentUserRole, onUpdated }: MembersTab
         </thead>
         <tbody>
           {members.map((member) => (
-            <tr key={member.id} className="border-b border-zinc-100 last:border-0">
-              <td className="px-4 py-3 font-medium text-zinc-900">{member.name}</td>
-              <td className="px-4 py-3 text-zinc-700">{member.email}</td>
-              <td className="px-4 py-3 text-zinc-700">{member.role}</td>
+            <tr key={member.id} className="border-b border-border last:border-0">
+              <td className="px-4 py-3 font-medium text-foreground">{member.name}</td>
+              <td className="px-4 py-3 text-foreground">{member.email}</td>
+              <td className="px-4 py-3 text-foreground">{member.role}</td>
               <td className="px-4 py-3">
                 <span
                   className={`rounded-full px-2 py-1 text-xs font-medium ${
                     member.isActive
-                      ? "bg-green-100 text-green-800"
-                      : "bg-zinc-200 text-zinc-700"
+                      ? "bg-success-soft text-success-foreground"
+                      : "bg-surface-muted text-foreground"
                   }`}
                 >
                   {member.isActive ? "Active" : "Inactive"}
@@ -86,12 +86,12 @@ export function MembersTable({ members, currentUserRole, onUpdated }: MembersTab
                   <button
                     type="button"
                     onClick={() => void handleToggleStatus(member)}
-                    className="text-sm font-medium text-zinc-700 underline hover:text-zinc-900"
+                    className="text-sm font-medium text-foreground underline hover:text-foreground"
                   >
                     {member.isActive ? "Deactivate" : "Activate"}
                   </button>
                 ) : (
-                  <span className="text-xs text-zinc-400">—</span>
+                  <span className="text-xs text-subtle-foreground">—</span>
                 )}
               </td>
             </tr>
@@ -99,7 +99,7 @@ export function MembersTable({ members, currentUserRole, onUpdated }: MembersTab
         </tbody>
       </table>
       {assignableRoles.length === 0 && (
-        <p className="px-4 py-2 text-xs text-zinc-500">No assignable roles for your account.</p>
+        <p className="px-4 py-2 text-xs text-muted-foreground">No assignable roles for your account.</p>
       )}
     </div>
   );

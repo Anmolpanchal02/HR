@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { getAuthErrorMessage, useAuth } from "@/providers/auth-provider";
 
 function validatePassword(password: string): string | null {
@@ -62,100 +63,58 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-md flex-col gap-4">
-      <div className="space-y-1">
-        <label htmlFor="organizationName" className="text-sm font-medium text-zinc-700">
-          Organization Name
-        </label>
-        <input
-          id="organizationName"
-          type="text"
-          value={organizationName}
-          onChange={(event) => setOrganizationName(event.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500"
-          required
-        />
-      </div>
-
-      <div className="space-y-1">
-        <label htmlFor="name" className="text-sm font-medium text-zinc-700">
-          Your Name
-        </label>
-        <input
-          id="name"
-          type="text"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500"
-          required
-        />
-      </div>
-
-      <div className="space-y-1">
-        <label htmlFor="email" className="text-sm font-medium text-zinc-700">
-          Email
-        </label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500"
-          autoComplete="email"
-          required
-        />
-      </div>
-
-      <div className="space-y-1">
-        <label htmlFor="password" className="text-sm font-medium text-zinc-700">
-          Password
-        </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500"
-          autoComplete="new-password"
-          required
-        />
-      </div>
-
-      <div className="space-y-1">
-        <label htmlFor="confirmPassword" className="text-sm font-medium text-zinc-700">
-          Confirm Password
-        </label>
-        <input
-          id="confirmPassword"
-          type="password"
-          value={confirmPassword}
-          onChange={(event) => setConfirmPassword(event.target.value)}
-          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-500"
-          autoComplete="new-password"
-          required
-        />
-      </div>
+    <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
+      <Input
+        id="organizationName"
+        label="Organization name"
+        value={organizationName}
+        onChange={(event) => setOrganizationName(event.target.value)}
+        required
+      />
+      <Input
+        id="name"
+        label="Your name"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+        required
+      />
+      <Input
+        id="email"
+        label="Email"
+        type="email"
+        value={email}
+        onChange={(event) => setEmail(event.target.value)}
+        autoComplete="email"
+        required
+      />
+      <Input
+        id="password"
+        label="Password"
+        type="password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        autoComplete="new-password"
+        required
+      />
+      <Input
+        id="confirmPassword"
+        label="Confirm password"
+        type="password"
+        value={confirmPassword}
+        onChange={(event) => setConfirmPassword(event.target.value)}
+        autoComplete="new-password"
+        required
+      />
 
       {error && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-xl border border-destructive/30 bg-destructive-soft px-3 py-2 text-sm text-destructive">
           {error}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {loading ? "Creating account..." : "Register"}
-      </button>
-
-      <p className="text-center text-sm text-zinc-600">
-        Already have an account?{" "}
-        <Link href="/login" className="font-medium text-zinc-900 underline">
-          Login
-        </Link>
-      </p>
+      <Button type="submit" loading={loading} className="w-full" size="lg">
+        {loading ? "Creating account..." : "Create account"}
+      </Button>
     </form>
   );
 }

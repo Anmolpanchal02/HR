@@ -85,7 +85,7 @@ export function ProjectForm({ onCreated, defaultOpen = false, onCancel }: Projec
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+        className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
       >
         + New Project
       </button>
@@ -95,36 +95,36 @@ export function ProjectForm({ onCreated, defaultOpen = false, onCancel }: Projec
   return (
     <form
       onSubmit={(e) => void handleSubmit(e)}
-      className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm"
+      className="rounded-xl border border-border bg-surface p-4 shadow-sm"
     >
-      <h2 className="text-lg font-medium text-zinc-900">Create project</h2>
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      <h2 className="text-lg font-medium text-foreground">Create project</h2>
+      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <input
           required
           placeholder="Project name"
           value={form.name}
           onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
         />
         <input
           required
           placeholder="Key (e.g. PAY)"
           value={form.key}
           onChange={(e) => setForm((f) => ({ ...f, key: e.target.value.toUpperCase() }))}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm font-mono uppercase"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm font-mono uppercase"
         />
         <textarea
           placeholder="Description"
           value={form.description}
           onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-          className="sm:col-span-2 rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="sm:col-span-2 rounded-lg border border-border-strong px-3 py-2 text-sm"
           rows={2}
         />
         <select
           value={form.status}
           onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as ProjectStatus }))}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
         >
           {STATUS_OPTIONS.map((s) => (
             <option key={s} value={s}>{s.replace(/_/g, " ")}</option>
@@ -133,7 +133,7 @@ export function ProjectForm({ onCreated, defaultOpen = false, onCancel }: Projec
         <select
           value={form.priority}
           onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value as ProjectPriority }))}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
         >
           {PRIORITY_OPTIONS.map((p) => (
             <option key={p} value={p}>{p}</option>
@@ -143,18 +143,18 @@ export function ProjectForm({ onCreated, defaultOpen = false, onCancel }: Projec
           type="date"
           value={form.startDate}
           onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
         />
         <input
           type="date"
           value={form.targetDate}
           onChange={(e) => setForm((f) => ({ ...f, targetDate: e.target.value }))}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
         />
         <select
           value={form.ownerId}
           onChange={(e) => setForm((f) => ({ ...f, ownerId: e.target.value }))}
-          className="sm:col-span-2 rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="sm:col-span-2 rounded-lg border border-border-strong px-3 py-2 text-sm"
         >
           <option value="">Select owner (optional)</option>
           {owners.map((o) => (
@@ -166,7 +166,7 @@ export function ProjectForm({ onCreated, defaultOpen = false, onCancel }: Projec
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {loading ? "Creating..." : "Create"}
         </button>
@@ -176,7 +176,7 @@ export function ProjectForm({ onCreated, defaultOpen = false, onCancel }: Projec
             setOpen(false);
             onCancel?.();
           }}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-4 py-2 text-sm"
         >
           Cancel
         </button>

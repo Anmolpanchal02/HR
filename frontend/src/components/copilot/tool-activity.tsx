@@ -7,17 +7,17 @@ interface ToolActivityProps {
 }
 
 const TOOL_LABELS: Record<string, string> = {
-  search_employees: "Searching employees",
-  get_employee: "Fetching employee",
-  search_projects: "Searching projects",
-  get_project: "Fetching project",
-  create_project: "Creating project",
-  update_project: "Updating project",
-  search_tasks: "Searching tasks",
-  get_task: "Fetching task",
-  create_task: "Creating task",
-  update_task: "Updating task",
-  search_documents: "Searching documents",
+  search_employees: "Searched employees",
+  get_employee: "Fetched employee",
+  search_projects: "Searched projects",
+  get_project: "Fetched project",
+  create_project: "Created project",
+  update_project: "Updated project",
+  search_tasks: "Searched tasks",
+  get_task: "Fetched task",
+  create_task: "Created task",
+  update_task: "Updated task",
+  search_documents: "Searched documents",
 };
 
 function activityLabel(call: ToolCallSummary): string {
@@ -30,20 +30,23 @@ export function ToolActivity({ toolCalls }: ToolActivityProps) {
   if (toolCalls.length === 0) return null;
 
   return (
-    <ul className="mt-3 space-y-1.5 border-t border-zinc-100 pt-3" aria-label="Tool activity">
-      {toolCalls.map((call, index) => (
-        <li
-          key={`${call.tool}-${index}`}
-          className={`flex items-start gap-2 text-xs ${
-            call.status === "success" ? "text-emerald-700" : "text-red-700"
-          }`}
-        >
-          <span aria-hidden className="mt-px shrink-0">
-            {call.status === "success" ? "✓" : "✕"}
-          </span>
-          <span>{activityLabel(call)}</span>
-        </li>
-      ))}
+    <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Tool activity">
+      {toolCalls.map((call, index) => {
+        const ok = call.status === "success";
+        return (
+          <li
+            key={`${call.tool}-${index}`}
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${
+              ok
+                ? "bg-success-soft text-success ring-1 ring-success/25"
+                : "bg-destructive-soft text-destructive ring-1 ring-destructive/25"
+            }`}
+          >
+            <span aria-hidden>{ok ? "✓" : "✕"}</span>
+            <span>{activityLabel(call)}</span>
+          </li>
+        );
+      })}
     </ul>
   );
 }

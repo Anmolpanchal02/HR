@@ -54,16 +54,16 @@ export default function ProjectDetailPage() {
 
   if (isLoading || loading) {
     return (
-      <div className="flex min-h-full items-center justify-center bg-zinc-50">
-        <p className="text-sm text-zinc-600">Loading project...</p>
+      <div className="flex min-h-full items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading project...</p>
       </div>
     );
   }
 
   if (error || !project) {
     return (
-      <div className="flex min-h-full flex-col items-center justify-center bg-zinc-50 px-6">
-        <p className="text-sm text-red-600">{error ?? "Project not found"}</p>
+      <div className="flex min-h-full flex-col items-center justify-center bg-background px-6">
+        <p className="text-sm text-destructive">{error ?? "Project not found"}</p>
         <Link href="/projects" className="mt-4 text-sm underline">
           Back to projects
         </Link>
@@ -72,13 +72,13 @@ export default function ProjectDetailPage() {
   }
 
   return (
-    <div className="min-h-full bg-zinc-50 px-6 py-16">
+    <div className="min-h-full bg-background px-6 py-16">
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         <ProjectCard project={project} />
 
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-medium text-zinc-900">Tasks</h2>
+            <h2 className="text-lg font-medium text-foreground">Tasks</h2>
             {user && canCreateTasks(user.role) && !showCreateTask && (
               <Button size="sm" onClick={() => setShowCreateTask(true)}>
                 + New Task

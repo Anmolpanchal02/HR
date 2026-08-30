@@ -55,16 +55,16 @@ export default function EmployeeDetailPage() {
 
   if (isLoading || loading) {
     return (
-      <div className="flex min-h-full items-center justify-center bg-zinc-50">
-        <p className="text-sm text-zinc-600">Loading employee profile...</p>
+      <div className="flex min-h-full items-center justify-center bg-background">
+        <p className="text-sm text-muted-foreground">Loading employee profile...</p>
       </div>
     );
   }
 
   if (error || !employee) {
     return (
-      <div className="flex min-h-full flex-col items-center justify-center bg-zinc-50 px-6">
-        <p className="text-sm text-red-600">{error ?? "Employee not found"}</p>
+      <div className="flex min-h-full flex-col items-center justify-center bg-background px-6">
+        <p className="text-sm text-destructive">{error ?? "Employee not found"}</p>
         <Link href="/employees" className="mt-4 text-sm underline">
           Back to employees
         </Link>
@@ -75,11 +75,11 @@ export default function EmployeeDetailPage() {
   const canManage = user ? canManageEmployees(user.role) : false;
 
   return (
-    <div className="min-h-full bg-zinc-50 px-6 py-16">
+    <div className="min-h-full bg-background px-6 py-16">
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         <Link
           href={canManage ? "/employees" : "/dashboard"}
-          className="text-sm font-medium text-zinc-700 underline"
+          className="text-sm font-medium text-foreground underline"
         >
           {canManage ? "Back to employees" : "Back to dashboard"}
         </Link>

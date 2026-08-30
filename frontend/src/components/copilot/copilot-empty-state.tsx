@@ -1,10 +1,26 @@
 "use client";
 
 const EXAMPLES = [
-  "What is our leave policy?",
-  "Show me active projects.",
-  'Create a task for Rahul in PAY called "Fix Payment API".',
-  "Summarize recent engineering activity.",
+  {
+    title: "Leave policy",
+    prompt: "What is our leave policy?",
+    hint: "Search company documents",
+  },
+  {
+    title: "Active projects",
+    prompt: "Show me active projects.",
+    hint: "List projects by status",
+  },
+  {
+    title: "Create a task",
+    prompt: 'Create a task for Rahul in PAY called "Fix Payment API".',
+    hint: "Assign work across the org",
+  },
+  {
+    title: "Find someone",
+    prompt: "Find employee Rahul.",
+    hint: "Look up people and roles",
+  },
 ];
 
 interface CopilotEmptyStateProps {
@@ -13,28 +29,37 @@ interface CopilotEmptyStateProps {
 
 export function CopilotEmptyState({ onExampleClick }: CopilotEmptyStateProps) {
   return (
-    <div className="flex h-full min-h-[320px] flex-col items-center justify-center px-4 py-8 text-center">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-900 text-white">
-        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+    <div className="flex h-full min-h-[360px] flex-col items-center justify-center px-4 py-10">
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-from to-brand-to text-white shadow-md shadow-primary/25">
+        <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
+          />
         </svg>
       </div>
-      <h2 className="text-lg font-semibold text-zinc-900">AI Copilot</h2>
-      <p className="mt-1 max-w-md text-sm text-zinc-500">
-        Ask questions, find information, and get work done across your organization.
+      <h2 className="text-xl font-semibold tracking-tight text-foreground">
+        How can I help?
+      </h2>
+      <p className="mt-2 max-w-sm text-center text-sm leading-relaxed text-muted-foreground">
+        Ask about people, projects, tasks, or documents — I can look things up and take action.
       </p>
-      <p className="mt-6 text-xs font-semibold uppercase tracking-wide text-zinc-400">
-        Try asking
-      </p>
-      <div className="mt-3 flex max-w-xl flex-col gap-2">
+
+      <div className="mt-8 grid w-full max-w-2xl gap-3 sm:grid-cols-2">
         {EXAMPLES.map((example) => (
           <button
-            key={example}
+            key={example.title}
             type="button"
-            onClick={() => onExampleClick(example)}
-            className="rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-left text-sm text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
+            onClick={() => onExampleClick(example.prompt)}
+            className="group rounded-2xl border border-border bg-surface p-4 text-left shadow-sm transition-all hover:border-border-strong hover:shadow-md"
           >
-            &ldquo;{example}&rdquo;
+            <p className="text-sm font-medium text-foreground group-hover:text-foreground">
+              {example.title}
+            </p>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              {example.hint}
+            </p>
           </button>
         ))}
       </div>

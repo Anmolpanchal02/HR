@@ -13,11 +13,11 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div
-      className="rounded-xl border border-red-200 bg-red-50 px-6 py-8 text-center"
+      className="rounded-2xl border border-destructive/30 bg-destructive-soft px-6 py-8 text-center"
       role="alert"
     >
-      <h3 className="text-sm font-semibold text-red-900">{title}</h3>
-      <p className="mt-1 text-sm text-red-700">{message}</p>
+      <h3 className="text-sm font-semibold text-destructive-foreground">{title}</h3>
+      <p className="mt-1 text-sm text-destructive">{message}</p>
       {onRetry && (
         <Button variant="secondary" className="mt-4" onClick={onRetry}>
           Try again

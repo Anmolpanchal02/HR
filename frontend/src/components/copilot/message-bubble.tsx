@@ -10,7 +10,10 @@ interface MessageBubbleProps {
 
 function AssistantAvatar() {
   return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-zinc-900 text-[10px] font-bold text-white">
+    <div
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-from to-brand-to text-[10px] font-semibold tracking-wide text-white shadow-sm"
+      aria-hidden
+    >
       AI
     </div>
   );
@@ -22,7 +25,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   if (isUser) {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[85%] rounded-xl bg-zinc-900 px-4 py-2.5 text-sm text-white">
+        <div className="max-w-[min(100%,36rem)] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm leading-relaxed text-white shadow-sm">
           <p className="whitespace-pre-wrap">{message.content}</p>
         </div>
       </div>
@@ -32,9 +35,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   return (
     <div className="flex gap-3">
       <AssistantAvatar />
-      <div className="min-w-0 max-w-[85%] flex-1">
-        <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-800 shadow-sm">
-          <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+      <div className="min-w-0 max-w-[min(100%,40rem)] flex-1 pt-0.5">
+        <p className="mb-1 text-xs font-medium text-subtle-foreground">Copilot</p>
+        <div className="text-sm leading-relaxed text-foreground">
+          <p className="whitespace-pre-wrap">{message.content}</p>
           {message.toolCalls && message.toolCalls.length > 0 && (
             <ToolActivity toolCalls={message.toolCalls} />
           )}
@@ -51,14 +55,15 @@ export function ThinkingIndicator() {
   return (
     <div className="flex gap-3">
       <AssistantAvatar />
-      <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-        <div className="flex items-center gap-2 text-sm text-zinc-500">
-          <span className="flex gap-1">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400" />
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400 [animation-delay:150ms]" />
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-zinc-400 [animation-delay:300ms]" />
+      <div className="pt-0.5">
+        <p className="mb-1 text-xs font-medium text-subtle-foreground">Copilot</p>
+        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-sm text-muted-foreground shadow-sm">
+          <span className="flex gap-1" aria-hidden>
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]" />
+            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]" />
           </span>
-          Working on your request...
+          Thinking…
         </div>
       </div>
     </div>

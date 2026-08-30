@@ -1,6 +1,6 @@
 "use client";
 
-import { IconPlus } from "@/components/icons";
+import { IconPlus, IconX } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import type { ConversationListItem } from "@/types/copilot";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,9 @@ interface ConversationSidebarProps {
   onSelect: (id: string) => void;
   onNew: () => void;
   onDelete: (id: string) => void;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+  className?: string;
 }
 
 function groupConversations(conversations: ConversationListItem[]) {
@@ -44,59 +47,108 @@ export function ConversationSidebar({
   onSelect,
   onNew,
   onDelete,
+  mobileOpen,
+  onMobileClose,
+  className,
 }: ConversationSidebarProps) {
   const groups = groupConversations(conversations);
 
-  return (
-    <aside className="flex h-full w-full flex-col border-r border-zinc-200 bg-zinc-50/50 lg:w-72">
-      <div className="border-b border-zinc-200 p-3">
-        <Button onClick={onNew} className="w-full" size="sm">
-          <IconPlus />
-          New Chat
-        </Button>
-      </div>
+  function select(id: string) {
+    onSelect(id);
+    onMobileClose?.();
+  }
 
-      <div className="flex-1 overflow-y-auto p-2">
-        {loading ? (
-          <p className="px-2 py-4 text-xs text-zinc-400">Loading conversations...</p>
-        ) : conversations.length === 0 ? (
-          <p className="px-2 py-4 text-xs text-zinc-500">No conversations yet. Start a new chat.</p>
-        ) : (
-          groups.map((group) => (
-            <div key={group.label} className="mb-4">
-              <p className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
-                {group.label}
-              </p>
-              <ul className="space-y-0.5">
-                {group.items.map((conversation) => (
-                  <li key={conversation.id} className="group flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => onSelect(conversation.id)}
-                      className={cn(
-                        "flex-1 truncate rounded-lg px-2.5 py-2 text-left text-sm transition-colors",
-                        activeId === conversation.id
-                          ? "bg-white font-medium text-zinc-900 shadow-sm"
-                          : "text-zinc-600 hover:bg-white/80 hover:text-zinc-900",
-                      )}
-                    >
-                      {conversation.title}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onDelete(conversation.id)}
-                      className="rounded px-1.5 py-1 text-xs text-zinc-300 opacity-0 transition-opacity hover:text-red-600 group-hover:opacity-100"
-                      aria-label={`Delete ${conversation.title}`}
-                    >
-                      ×
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))
+  function createNew() {
+    onNew();
+    onMobileClose?.();
+  }
+
+  return (
+    <>
+      {mobileOpen && (
+        <button
+          type="button"
+          className="absolute inset-0 z-30 bg-overlay backdrop-blur-[1px] lg:hidden"
+          aria-label="Close history"
+          onClick={onMobileClose}
+        />
+      )}
+
+      <aside
+        className={cn(
+          "z-40 flex h-full w-[min(18rem,85vw)] shrink-0 flex-col border-r border-border bg-background",
+          "",
+          "absolute inset-y-0 left-0 transition-transform duration-200 lg:static lg:w-72 lg:translate-x-0",
+          mobileOpen ? "translate-x-0 shadow-xl" : "-translate-x-full lg:translate-x-0 lg:shadow-none",
+          className,
         )}
-      </div>
-    </aside>
+      >
+        <div className="flex items-center gap-2 border-b border-border p-3">
+          <Button onClick={createNew} className="flex-1" size="sm">
+            <IconPlus />
+            New chat
+          </Button>
+          <button
+            type="button"
+            onClick={onMobileClose}
+            className="rounded-lg p-2 text-muted-foreground hover:bg-surface-muted lg:hidden"
+            aria-label="Close history"
+          >
+            <IconX className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-2">
+          {loading ? (
+            <div className="space-y-2 px-1 py-2">
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-9 animate-pulse rounded-xl bg-surface-muted"
+                />
+              ))}
+            </div>
+          ) : conversations.length === 0 ? (
+            <p className="px-3 py-6 text-center text-xs leading-relaxed text-muted-foreground">
+              No chats yet. Start a conversation to see history here.
+            </p>
+          ) : (
+            groups.map((group) => (
+              <div key={group.label} className="mb-4">
+                <p className="mb-1.5 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-subtle-foreground">
+                  {group.label}
+                </p>
+                <ul className="space-y-0.5">
+                  {group.items.map((conversation) => (
+                    <li key={conversation.id} className="group relative flex items-center">
+                      <button
+                        type="button"
+                        onClick={() => select(conversation.id)}
+                        className={cn(
+                          "w-full truncate rounded-xl px-3 py-2 pr-8 text-left text-sm transition-colors",
+                          activeId === conversation.id
+                            ? "bg-surface font-medium text-foreground shadow-sm ring-1 ring-border"
+                            : "text-muted-foreground hover:bg-surface/70 hover:text-foreground",
+                        )}
+                      >
+                        {conversation.title}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onDelete(conversation.id)}
+                        className="absolute right-1.5 rounded-md px-1.5 py-1 text-sm text-subtle-foreground opacity-0 transition-opacity hover:bg-destructive-soft hover:text-destructive group-hover:opacity-100"
+                        aria-label={`Delete ${conversation.title}`}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          )}
+        </div>
+      </aside>
+    </>
   );
 }

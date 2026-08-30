@@ -14,54 +14,54 @@ import {
   IconUsers,
   IconX,
 } from "@/components/icons";
+import { BrandMark } from "@/components/layout/brand-mark";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/providers/auth-provider";
+import { navigationForRole, type NavItem } from "@/types/permissions";
 
-interface NavItem {
-  href: string;
-  label: string;
-  icon: React.ReactNode;
+const ICONS = {
+  dashboard: <IconDashboard />,
+  copilot: <IconCopilot />,
+  users: <IconUsers />,
+  folder: <IconFolder />,
+  tasks: <IconCheckSquare />,
+  document: <IconDocument />,
+  code: <IconCode />,
+  settings: <IconSettings />,
+} as const;
+
+function navClass(active: boolean) {
+  return cn(
+    "flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-medium transition-colors",
+    active
+      ? "bg-sidebar-active text-sidebar-active-foreground shadow-sm"
+      : "text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-foreground",
+  );
 }
 
-interface NavSection {
-  title?: string;
-  items: NavItem[];
+function NavLink({
+  item,
+  active,
+  onClose,
+}: {
+  item: NavItem;
+  active: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <Link
+      href={item.href}
+      onClick={onClose}
+      className={navClass(active)}
+      aria-current={active ? "page" : undefined}
+    >
+      <span className={active ? "text-sidebar-active-icon" : "text-sidebar-muted"}>
+        {ICONS[item.iconKey]}
+      </span>
+      {item.label}
+    </Link>
+  );
 }
-
-const navigation: NavSection[] = [
-  {
-    items: [{ href: "/dashboard", label: "Dashboard", icon: <IconDashboard /> }],
-  },
-  {
-    title: "AI",
-    items: [{ href: "/copilot", label: "Copilot", icon: <IconCopilot /> }],
-  },
-  {
-    title: "People",
-    items: [
-      { href: "/members", label: "Members", icon: <IconUsers /> },
-      { href: "/employees", label: "Employees", icon: <IconUsers /> },
-    ],
-  },
-  {
-    title: "Work",
-    items: [
-      { href: "/projects", label: "Projects", icon: <IconFolder /> },
-      { href: "/tasks", label: "Tasks", icon: <IconCheckSquare /> },
-    ],
-  },
-  {
-    title: "Knowledge",
-    items: [{ href: "/documents", label: "Documents", icon: <IconDocument /> }],
-  },
-  {
-    title: "Engineering",
-    items: [{ href: "/engineering", label: "Engineering", icon: <IconCode /> }],
-  },
-];
-
-const bottomNav: NavItem[] = [
-  { href: "/settings", label: "Settings", icon: <IconSettings /> },
-];
 
 interface SidebarProps {
   open: boolean;
@@ -70,21 +70,17 @@ interface SidebarProps {
 
 export function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useAuth();
+  const navigation = user ? navigationForRole(user.role) : [];
 
   const content = (
-    <div className="flex h-full flex-col">
-      <div className="flex h-14 items-center gap-2 border-b border-zinc-200 px-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
-          <IconCopilot className="h-4 w-4" />
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-zinc-900">HR Copilot</p>
-          <p className="truncate text-xs text-zinc-500">AI Engineering</p>
-        </div>
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
+      <div className="flex h-14 items-center gap-2 border-b border-sidebar-border px-4">
+        <BrandMark compact inverted className="min-w-0 flex-1" />
         <button
           type="button"
           onClick={onClose}
-          className="ml-auto rounded-lg p-1.5 text-zinc-500 hover:bg-zinc-100 lg:hidden"
+          className="rounded-lg p-1.5 text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-foreground lg:hidden"
           aria-label="Close menu"
         >
           <IconX />
@@ -93,9 +89,9 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
       <nav className="flex-1 overflow-y-auto px-3 py-4" aria-label="Main navigation">
         {navigation.map((section) => (
-          <div key={section.title ?? "root"} className="mb-4 last:mb-0">
+          <div key={section.title ?? "root"} className="mb-5 last:mb-0">
             {section.title && (
-              <p className="mb-1 px-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+              <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-sidebar-muted">
                 {section.title}
               </p>
             )}
@@ -106,22 +102,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                   (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
                 return (
                   <li key={`${section.title}-${item.label}`}>
-                    <Link
-                      href={item.href}
-                      onClick={onClose}
-                      className={cn(
-                        "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
-                        active
-                          ? "bg-zinc-100 text-zinc-900"
-                          : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
-                      )}
-                      aria-current={active ? "page" : undefined}
-                    >
-                      <span className={cn(active ? "text-zinc-900" : "text-zinc-400")}>
-                        {item.icon}
-                      </span>
-                      {item.label}
-                    </Link>
+                    <NavLink item={item} active={active} onClose={onClose} />
                   </li>
                 );
               })}
@@ -130,26 +111,12 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="border-t border-zinc-200 px-3 py-3">
-        {bottomNav.map((item) => {
-          const active = pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className={cn(
-                "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
-                active
-                  ? "bg-zinc-100 text-zinc-900"
-                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900",
-              )}
-            >
-              <span className={cn(active ? "text-zinc-900" : "text-zinc-400")}>{item.icon}</span>
-              {item.label}
-            </Link>
-          );
-        })}
+      <div className="border-t border-sidebar-border px-3 py-3">
+        <NavLink
+          item={{ href: "/settings", label: "Settings", iconKey: "settings" }}
+          active={pathname.startsWith("/settings")}
+          onClose={onClose}
+        />
       </div>
     </div>
   );
@@ -159,14 +126,14 @@ export function Sidebar({ open, onClose }: SidebarProps) {
       {open && (
         <button
           type="button"
-          className="fixed inset-0 z-40 bg-zinc-900/40 lg:hidden"
+          className="fixed inset-0 z-40 bg-overlay backdrop-blur-sm lg:hidden"
           onClick={onClose}
           aria-label="Close sidebar overlay"
         />
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[var(--sidebar-width)] border-r border-zinc-200 bg-white transition-transform duration-200 lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-[var(--sidebar-width)] overflow-hidden transition-transform duration-200 lg:static lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >

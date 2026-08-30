@@ -1,12 +1,12 @@
 import { cn } from "@/lib/utils";
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("skeleton-shimmer rounded-md bg-zinc-100", className)} aria-hidden />;
+  return <div className={cn("skeleton-shimmer rounded-md bg-surface-muted", className)} aria-hidden />;
 }
 
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="space-y-2 rounded-xl border border-zinc-200 bg-white p-4">
+    <div className="space-y-2 rounded-xl border border-border bg-surface p-4">
       <Skeleton className="h-8 w-full" />
       {Array.from({ length: rows }).map((_, i) => (
         <Skeleton key={i} className="h-10 w-full" />
@@ -17,7 +17,7 @@ export function TableSkeleton({ rows = 5 }: { rows?: number }) {
 
 export function CardSkeleton() {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+    <div className="rounded-xl border border-border bg-surface p-5">
       <Skeleton className="mb-3 h-4 w-24" />
       <Skeleton className="mb-2 h-8 w-16" />
       <Skeleton className="h-3 w-32" />

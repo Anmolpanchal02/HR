@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { EmployeeFilters } from "@/components/employees/employee-filters";
@@ -16,9 +17,11 @@ import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
 import type { EmployeeListItem, EmployeeStatus, PaginationMeta } from "@/types/employee";
 import { canManageEmployees } from "@/types/employee";
+import { canAccessEmployeeDirectory } from "@/types/permissions";
 
 export default function EmployeesPage() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
   const [employees, setEmployees] = useState<EmployeeListItem[]>([]);
   const [pagination, setPagination] = useState<PaginationMeta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,11 +54,22 @@ export default function EmployeesPage() {
   }, [page, search, department, status]);
 
   useEffect(() => {
+    if (!isLoading && user && !canAccessEmployeeDirectory(user.role)) {
+      if (user.employeeId) {
+        router.replace(`/employees/${user.employeeId}`);
+      } else {
+        router.replace("/dashboard");
+      }
+    }
+  }, [isLoading, user, router]);
+
+  useEffect(() => {
+    if (!user || !canAccessEmployeeDirectory(user.role)) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- load employees from API
     void loadEmployees();
-  }, [loadEmployees]);
+  }, [loadEmployees, user]);
 
-  if (!user) return <TableSkeleton />;
+  if (!user || isLoading || !canAccessEmployeeDirectory(user.role)) return <TableSkeleton />;
 
   return (
     <div className="space-y-6">

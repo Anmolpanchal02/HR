@@ -69,7 +69,7 @@ export function AddMemberForm({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+        className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
       >
         + Add Member
       </button>
@@ -79,16 +79,16 @@ export function AddMemberForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+      className="rounded-xl border border-border bg-surface p-6 shadow-sm"
     >
-      <h2 className="text-lg font-medium text-zinc-900">Add Member</h2>
+      <h2 className="text-lg font-medium text-foreground">Add Member</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <input
           type="text"
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
           required
         />
         <input
@@ -96,7 +96,7 @@ export function AddMemberForm({
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
           required
         />
         <input
@@ -104,13 +104,13 @@ export function AddMemberForm({
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
           required
         />
         <select
           value={role}
           onChange={(e) => setRole(e.target.value as MemberRole)}
-          className="rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+          className="rounded-lg border border-border-strong px-3 py-2 text-sm"
         >
           {assignableRoles.map((r) => (
             <option key={r} value={r}>
@@ -120,13 +120,13 @@ export function AddMemberForm({
         </select>
       </div>
 
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 
       <div className="mt-4 flex gap-2">
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-60"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-60"
         >
           {loading ? "Creating..." : "Create Member"}
         </button>
@@ -136,7 +136,7 @@ export function AddMemberForm({
             setOpen(false);
             onCancel?.();
           }}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm text-zinc-700 hover:bg-zinc-50"
+          className="rounded-lg border border-border-strong px-4 py-2 text-sm text-foreground hover:bg-background"
         >
           Cancel
         </button>

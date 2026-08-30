@@ -78,7 +78,7 @@ export function EmployeeForm({ onCreated, defaultOpen = false, onCancel }: Emplo
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+        className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover"
       >
         + Add Employee
       </button>
@@ -88,9 +88,9 @@ export function EmployeeForm({ onCreated, defaultOpen = false, onCancel }: Emplo
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm"
+      className="rounded-xl border border-border bg-surface p-6 shadow-sm"
     >
-      <h2 className="text-lg font-medium text-zinc-900">Add Employee</h2>
+      <h2 className="text-lg font-medium text-foreground">Add Employee</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         {(
           [
@@ -104,28 +104,28 @@ export function EmployeeForm({ onCreated, defaultOpen = false, onCancel }: Emplo
           ] as const
         ).map(([key, label]) => (
           <div key={key} className="space-y-1">
-            <label className="text-xs font-medium text-zinc-600">{label}</label>
+            <label className="text-xs font-medium text-muted-foreground">{label}</label>
             <input
               type={key === "email" ? "email" : "text"}
               required={["firstName", "lastName", "email", "department", "jobTitle"].includes(key)}
               value={form[key]}
               onChange={(e) => setForm((current) => ({ ...current, [key]: e.target.value }))}
-              className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+              className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
             />
           </div>
         ))}
         <div className="space-y-1">
-          <label className="text-xs font-medium text-zinc-600">Date of Joining</label>
+          <label className="text-xs font-medium text-muted-foreground">Date of Joining</label>
           <input
             type="date"
             required
             value={form.dateOfJoining}
             onChange={(e) => setForm((current) => ({ ...current, dateOfJoining: e.target.value }))}
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-zinc-600">Employment Type</label>
+          <label className="text-xs font-medium text-muted-foreground">Employment Type</label>
           <select
             value={form.employmentType}
             onChange={(e) =>
@@ -134,7 +134,7 @@ export function EmployeeForm({ onCreated, defaultOpen = false, onCancel }: Emplo
                 employmentType: e.target.value as EmploymentType,
               }))
             }
-            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm"
+            className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
           >
             {EMPLOYMENT_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -145,13 +145,13 @@ export function EmployeeForm({ onCreated, defaultOpen = false, onCancel }: Emplo
         </div>
       </div>
 
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
 
       <div className="mt-4 flex gap-2">
         <button
           type="submit"
           disabled={loading}
-          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
         >
           {loading ? "Creating..." : "Create Employee"}
         </button>
@@ -161,7 +161,7 @@ export function EmployeeForm({ onCreated, defaultOpen = false, onCancel }: Emplo
             setOpen(false);
             onCancel?.();
           }}
-          className="rounded-lg border border-zinc-300 px-4 py-2 text-sm text-zinc-700"
+          className="rounded-lg border border-border-strong px-4 py-2 text-sm text-foreground"
         >
           Cancel
         </button>
