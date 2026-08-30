@@ -26,6 +26,12 @@ export async function buildApp() {
   app.setErrorHandler(errorHandler);
   app.setNotFoundHandler(notFoundHandler);
 
+  app.get("/", async () => ({
+    success: true,
+    message: "AI HR Copilot API",
+    health: "/api/v1/health",
+  }));
+
   await app.register(healthRoutes, { prefix: "/api/v1" });
   await app.register(authRoutes, { prefix: "/api/v1/auth" });
   await app.register(userRoutes, { prefix: "/api/v1/users" });
