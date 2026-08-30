@@ -9,6 +9,8 @@ interface ToolActivityProps {
 const TOOL_LABELS: Record<string, string> = {
   search_employees: "Searched employees",
   get_employee: "Fetched employee",
+  create_employee: "Created employee",
+  update_employee: "Updated employee",
   search_projects: "Searched projects",
   get_project: "Fetched project",
   create_project: "Created project",
@@ -18,6 +20,8 @@ const TOOL_LABELS: Record<string, string> = {
   create_task: "Created task",
   update_task: "Updated task",
   search_documents: "Searched documents",
+  list_documents: "Listed documents",
+  get_document: "Fetched document",
 };
 
 function activityLabel(call: ToolCallSummary): string {

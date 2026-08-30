@@ -14,22 +14,41 @@ function toAuthContext(context: ToolContext) {
 export const searchTasksTool = {
   definition: {
     name: "search_tasks",
-    description: "Search tasks by title or description",
+    description:
+      "Search or list tasks. Filter by text query, status, projectId, assigneeId, or priority. Omit query to list by filters.",
     inputSchema: {
       type: "object",
-      properties: { query: { type: "string" } },
-      required: ["query"],
+      properties: {
+        query: { type: "string", description: "Search title/description" },
+        status: {
+          type: "string",
+          enum: ["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE", "BLOCKED", "CANCELLED"],
+        },
+        projectId: { type: "string" },
+        assigneeId: { type: "string", description: "Employee ID of assignee" },
+        priority: {
+          type: "string",
+          enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"],
+        },
+      },
     },
   },
   async execute(input: unknown, context: ToolContext): Promise<ToolResult> {
     const args = sanitizeToolInput(input);
     const query = typeof args.query === "string" ? args.query.trim() : "";
-    if (!query) return toolFailure("VALIDATION_ERROR", "query is required");
+    const projectId = typeof args.projectId === "string" ? args.projectId : undefined;
+    const assigneeId = typeof args.assigneeId === "string" ? args.assigneeId : undefined;
+    const status = typeof args.status === "string" ? args.status : undefined;
+    const priority = typeof args.priority === "string" ? args.priority : undefined;
 
     try {
       const result = await taskServiceApi.searchTasks(toAuthContext(context), {
-        search: query,
-        limit: 10,
+        search: query || undefined,
+        projectId,
+        assigneeId,
+        status: status as never,
+        priority: priority as never,
+        limit: 15,
       });
       const tasks = result.tasks.map((t) => ({
         id: t.id,
@@ -37,11 +56,22 @@ export const searchTasksTool = {
         status: t.status,
         priority: t.priority,
         projectKey: t.project?.key,
+        projectId: t.project?.id,
         assignee: t.assignee?.name,
+        assigneeId: t.assignee?.id,
       }));
+      const parts = [
+        query && `"${query}"`,
+        status && `status=${status}`,
+        projectId && "project filter",
+        assigneeId && "assignee filter",
+      ].filter(Boolean);
+      const label = parts.length ? parts.join(", ") : "all";
       return toolSuccess(
         { tasks, count: tasks.length },
-        `Found ${tasks.length} task(s) matching "${query}"`,
+        tasks.length
+          ? `Found ${tasks.length} task(s) (${label})`
+          : `No tasks found (${label})`,
       );
     } catch (error) {
       return toolFailureFromError(error, "Search failed");

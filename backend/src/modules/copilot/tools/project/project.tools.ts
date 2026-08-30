@@ -124,6 +124,9 @@ export const getProjectTool = {
           key: project.key,
           status: project.status,
           priority: project.priority,
+          description: project.description,
+          owner: project.owner,
+          taskSummary: project.taskSummary,
         },
         `Retrieved project ${project.key}`,
       );

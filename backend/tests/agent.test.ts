@@ -63,6 +63,8 @@ describe("AI Agent + Tool Calling", () => {
         expect.arrayContaining([
           "search_employees",
           "get_employee",
+          "create_employee",
+          "update_employee",
           "search_projects",
           "get_project",
           "create_project",
@@ -72,9 +74,11 @@ describe("AI Agent + Tool Calling", () => {
           "create_task",
           "update_task",
           "search_documents",
+          "list_documents",
+          "get_document",
         ]),
       );
-      expect(names).toHaveLength(11);
+      expect(names).toHaveLength(15);
     });
 
     it("rejects unknown tools", () => {

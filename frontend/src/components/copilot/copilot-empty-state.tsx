@@ -14,7 +14,18 @@ const EXAMPLES = [
   {
     title: "Create a task",
     prompt: 'Create a task for Rahul in PAY called "Fix Payment API".',
-    hint: "Assign work across the org",
+    hint: "Find people & projects, then create",
+  },
+  {
+    title: "Add an employee",
+    prompt:
+      "Create employee Priya Sharma, email priya@acme.com, Engineering, Software Engineer, joining today as FULL_TIME.",
+    hint: "HR/Admin can onboard people",
+  },
+  {
+    title: "Open tasks",
+    prompt: "List all IN_PROGRESS tasks.",
+    hint: "Filter work by status",
   },
   {
     title: "Find someone",
@@ -42,11 +53,12 @@ export function CopilotEmptyState({ onExampleClick }: CopilotEmptyStateProps) {
       <h2 className="text-xl font-semibold tracking-tight text-foreground">
         How can I help?
       </h2>
-      <p className="mt-2 max-w-sm text-center text-sm leading-relaxed text-muted-foreground">
-        Ask about people, projects, tasks, or documents — I can look things up and take action.
+      <p className="mt-2 max-w-md text-center text-sm leading-relaxed text-muted-foreground">
+        Find and create people, projects, and tasks — or search company docs. I use your org data
+        only through secure tools.
       </p>
 
-      <div className="mt-8 grid w-full max-w-2xl gap-3 sm:grid-cols-2">
+      <div className="mt-8 grid w-full max-w-2xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {EXAMPLES.map((example) => (
           <button
             key={example.title}

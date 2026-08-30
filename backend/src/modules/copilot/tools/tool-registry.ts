@@ -1,5 +1,10 @@
 import type { AgentTool } from "./tool.types.js";
-import { searchEmployeesTool, getEmployeeTool } from "./employee/employee.tools.js";
+import {
+  searchEmployeesTool,
+  getEmployeeTool,
+  createEmployeeTool,
+  updateEmployeeTool,
+} from "./employee/employee.tools.js";
 import {
   searchProjectsTool,
   getProjectTool,
@@ -12,11 +17,17 @@ import {
   createTaskTool,
   updateTaskTool,
 } from "./task/task.tools.js";
-import { searchDocumentsTool } from "./document/search-documents.tool.js";
+import {
+  searchDocumentsTool,
+  listDocumentsTool,
+  getDocumentTool,
+} from "./document/search-documents.tool.js";
 
 const ALL_TOOLS: AgentTool[] = [
   searchEmployeesTool,
   getEmployeeTool,
+  createEmployeeTool,
+  updateEmployeeTool,
   searchProjectsTool,
   getProjectTool,
   createProjectTool,
@@ -26,6 +37,8 @@ const ALL_TOOLS: AgentTool[] = [
   createTaskTool,
   updateTaskTool,
   searchDocumentsTool,
+  listDocumentsTool,
+  getDocumentTool,
 ];
 
 const toolMap = new Map(ALL_TOOLS.map((tool) => [tool.definition.name, tool]));
