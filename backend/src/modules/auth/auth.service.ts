@@ -4,15 +4,22 @@ import {
   findOrganizationById,
   findOrganizationBySlug,
 } from "../organizations/organization.repository.js";
-import { createUser, findUserById, findUsersByEmail } from "../users/user.repository.js";
+import { createUser, findUserById, findUsersByEmail, updateUserByIdAndOrganization } from "../users/user.repository.js";
+import { findEmployeeByUserIdAndOrganization, findDirectReportsByManager } from "../employees/employee.repository.js";
 import { UserRole, type SafeUser } from "../users/user.types.js";
 import type { RegisterInput, LoginInput, AuthResult } from "./auth.types.js";
 import { AppError } from "../../utils/app-error.js";
+import { provisionEmployeeProfileForUser } from "../../utils/employee-profile.js";
 import { signToken } from "../../utils/jwt.js";
 import { comparePassword, hashPassword, validatePasswordStrength } from "../../utils/password.js";
 import { generateSlug } from "../../utils/slug.js";
 
-function toSafeUser(user: IUser, organizationName?: string): SafeUser {
+function toSafeUser(
+  user: IUser,
+  organizationName?: string,
+  employeeId?: string,
+  hasDirectReports?: boolean,
+): SafeUser {
   return {
     id: user._id.toString(),
     name: user.name,
@@ -20,8 +27,39 @@ function toSafeUser(user: IUser, organizationName?: string): SafeUser {
     role: user.role,
     organizationId: user.organizationId.toString(),
     organizationName,
-    employeeId: user.employeeId?.toString(),
+    employeeId: employeeId ?? user.employeeId?.toString(),
+    hasDirectReports,
   };
+}
+
+async function resolveEmployeeId(user: IUser): Promise<string | undefined> {
+  if (user.employeeId) return user.employeeId.toString();
+
+  let employee = await findEmployeeByUserIdAndOrganization(
+    user._id.toString(),
+    user.organizationId.toString(),
+  );
+
+  if (!employee && user.role === UserRole.EMPLOYEE) {
+    employee = await provisionEmployeeProfileForUser(user);
+  }
+
+  if (!employee) return undefined;
+
+  const employeeId = employee._id.toString();
+  await updateUserByIdAndOrganization(user._id.toString(), user.organizationId.toString(), {
+    employeeId: employee._id,
+  });
+  return employeeId;
+}
+
+async function resolveHasDirectReports(
+  organizationId: string,
+  employeeId?: string,
+): Promise<boolean> {
+  if (!employeeId) return false;
+  const reports = await findDirectReportsByManager(employeeId, organizationId);
+  return reports.length > 0;
 }
 
 export class AuthService {
@@ -97,6 +135,11 @@ export class AuthService {
     }
 
     const organization = await findOrganizationById(user.organizationId.toString());
+    const employeeId = await resolveEmployeeId(user);
+    const hasDirectReports = await resolveHasDirectReports(
+      user.organizationId.toString(),
+      employeeId,
+    );
     const token = signToken({
       userId: user._id.toString(),
       organizationId: user.organizationId.toString(),
@@ -104,7 +147,7 @@ export class AuthService {
     });
 
     return {
-      user: toSafeUser(user, organization?.name),
+      user: toSafeUser(user, organization?.name, employeeId, hasDirectReports),
       token,
     };
   }
@@ -116,7 +159,12 @@ export class AuthService {
     }
 
     const organization = await findOrganizationById(user.organizationId.toString());
-    return toSafeUser(user, organization?.name);
+    const employeeId = await resolveEmployeeId(user);
+    const hasDirectReports = await resolveHasDirectReports(
+      user.organizationId.toString(),
+      employeeId,
+    );
+    return toSafeUser(user, organization?.name, employeeId, hasDirectReports);
   }
 }
 

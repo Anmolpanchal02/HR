@@ -4,6 +4,7 @@ import {
   createProjectRecord,
   findProjectByIdAndOrganization,
   listProjectsByOrganization,
+  listProjectsForEmployee,
   updateProjectByIdAndOrganization,
   type CreateProjectInput,
   type UpdateProjectInput,
@@ -19,9 +20,10 @@ import {
   type ProjectQueryParams,
 } from "./project.types.js";
 import type { IProject } from "./project.model.js";
-import { getTaskSummaryByProject } from "../tasks/task.repository.js";
+import { getTaskSummaryByProject, getTaskSummaryByProjectForAssignee, listDistinctProjectIdsForAssignee, employeeHasTaskInProject } from "../tasks/task.repository.js";
 import { type AuthContext } from "../users/user.types.js";
 import { AppError } from "../../utils/app-error.js";
+import { isEmployeeRole, requireEmployeeId } from "../../utils/access-scope.js";
 import { getEmployeeDisplayMap, validateEmployeeInOrganization } from "../../utils/employee-lookup.js";
 
 export interface CreateProjectRequest {
@@ -80,9 +82,16 @@ async function toProjectListItem(
 async function toProjectDetail(
   project: IProject,
   organizationId: string,
+  assigneeIdForSummary?: string,
 ): Promise<ProjectDetail> {
   const listItem = await toProjectListItem(project, organizationId);
-  const taskSummary = await getTaskSummaryByProject(project._id.toString(), organizationId);
+  const taskSummary = assigneeIdForSummary
+    ? await getTaskSummaryByProjectForAssignee(
+        project._id.toString(),
+        organizationId,
+        assigneeIdForSummary,
+      )
+    : await getTaskSummaryByProject(project._id.toString(), organizationId);
 
   return {
     ...listItem,
@@ -112,11 +121,40 @@ function handleDuplicateKey(error: unknown): never {
   throw error;
 }
 
+async function employeeCanAccessProject(
+  organizationId: string,
+  employeeId: string,
+  project: IProject,
+): Promise<boolean> {
+  if (project.ownerId?.toString() === employeeId) {
+    return true;
+  }
+  return employeeHasTaskInProject(organizationId, project._id.toString(), employeeId);
+}
+
 export class ProjectService {
   async listProjects(authUser: AuthContext, params: ProjectQueryParams): Promise<ProjectListResult> {
     const page = params.page ?? 1;
     const limit = params.limit ?? 20;
-    const { projects, total } = await listProjectsByOrganization(authUser.organizationId, params);
+
+    let projects: IProject[];
+    let total: number;
+
+    if (isEmployeeRole(authUser.role)) {
+      const employeeId = await requireEmployeeId(authUser);
+      const accessibleProjectIds = await listDistinctProjectIdsForAssignee(
+        authUser.organizationId,
+        employeeId,
+      );
+      ({ projects, total } = await listProjectsForEmployee(
+        authUser.organizationId,
+        employeeId,
+        accessibleProjectIds,
+        params,
+      ));
+    } else {
+      ({ projects, total } = await listProjectsByOrganization(authUser.organizationId, params));
+    }
 
     const ownerIds = projects
       .map((p) => p.ownerId?.toString())
@@ -150,6 +188,20 @@ export class ProjectService {
     if (!project) {
       throw new AppError("Project not found", 404);
     }
+
+    if (isEmployeeRole(authUser.role)) {
+      const employeeId = await requireEmployeeId(authUser);
+      const allowed = await employeeCanAccessProject(
+        authUser.organizationId,
+        employeeId,
+        project,
+      );
+      if (!allowed) {
+        throw new AppError("Forbidden", 403);
+      }
+      return toProjectDetail(project, authUser.organizationId, employeeId);
+    }
+
     return toProjectDetail(project, authUser.organizationId);
   }
 

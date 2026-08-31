@@ -70,3 +70,13 @@ export interface CreateEmployeePayload {
 export function canManageEmployees(role: string): boolean {
   return role === "ADMIN" || role === "HR";
 }
+
+export interface OrgChartNode {
+  id: string;
+  name: string;
+  jobTitle: string;
+  department: string;
+  managerId?: string;
+  status: EmployeeStatus;
+  children: OrgChartNode[];
+}

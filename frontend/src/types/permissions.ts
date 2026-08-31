@@ -12,10 +12,33 @@ export function isPeopleOpsRole(role: UserRole): boolean {
   return role === "ADMIN" || role === "HR";
 }
 
+export function canReviewLeave(role: UserRole, hasDirectReports?: boolean): boolean {
+  return isPeopleOpsRole(role) || Boolean(hasDirectReports);
+}
+
+export function canViewTeamAttendance(role: UserRole, hasDirectReports?: boolean): boolean {
+  return isPeopleOpsRole(role) || Boolean(hasDirectReports);
+}
+
+export function isEmployeeRole(role: UserRole): boolean {
+  return role === "EMPLOYEE";
+}
+
 export interface NavItem {
   href: string;
   label: string;
-  iconKey: "dashboard" | "copilot" | "users" | "folder" | "tasks" | "document" | "code" | "settings";
+  iconKey:
+    | "dashboard"
+    | "copilot"
+    | "users"
+    | "folder"
+    | "tasks"
+    | "document"
+    | "code"
+    | "settings"
+    | "clock"
+    | "calendar"
+    | "org";
 }
 
 export interface NavSection {
@@ -31,6 +54,14 @@ export function navigationForRole(role: UserRole): NavSection[] {
     {
       title: "AI",
       items: [{ href: "/copilot", label: "Copilot", iconKey: "copilot" }],
+    },
+    {
+      title: "HR & CRM",
+      items: [
+        { href: "/attendance", label: "Attendance", iconKey: "clock" },
+        { href: "/leave", label: "Leave", iconKey: "calendar" },
+        { href: "/org-chart", label: "Org chart", iconKey: "org" },
+      ],
     },
   ];
 

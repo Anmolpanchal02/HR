@@ -104,6 +104,22 @@ export async function listEmployeesByOrganization(
   return { employees, total };
 }
 
+export async function listActiveEmployeesByOrganization(
+  organizationId: string,
+): Promise<IEmployee[]> {
+  return Employee.find({
+    organizationId,
+    status: { $ne: EmployeeStatus.TERMINATED },
+  }).sort({ firstName: 1, lastName: 1 });
+}
+
+export async function findDirectReportsByManager(
+  managerId: string,
+  organizationId: string,
+): Promise<IEmployee[]> {
+  return Employee.find({ organizationId, managerId }).sort({ firstName: 1, lastName: 1 });
+}
+
 export async function getEmployeeEmail(userId: Types.ObjectId): Promise<string | null> {
   const user = await User.findById(userId).select("email");
   return user?.email ?? null;

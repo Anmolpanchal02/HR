@@ -4,12 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
+  IconCalendar,
   IconCheckSquare,
+  IconClock,
   IconCode,
   IconCopilot,
   IconDashboard,
   IconDocument,
   IconFolder,
+  IconOrg,
   IconSettings,
   IconUsers,
   IconX,
@@ -28,6 +31,9 @@ const ICONS = {
   document: <IconDocument />,
   code: <IconCode />,
   settings: <IconSettings />,
+  clock: <IconClock />,
+  calendar: <IconCalendar />,
+  org: <IconOrg />,
 } as const;
 
 function navClass(active: boolean) {

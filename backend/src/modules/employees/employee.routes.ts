@@ -5,7 +5,9 @@ import { requireRoles } from "../../middleware/role.middleware.js";
 import { UserRole } from "../users/user.types.js";
 import {
   createEmployee,
+  getDirectReports,
   getEmployee,
+  getOrgChart,
   listEmployees,
   updateEmployee,
   updateEmployeeStatus,
@@ -53,6 +55,29 @@ export async function employeeRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     createEmployee,
+  );
+
+  app.get(
+    "/org-chart",
+    {
+      preHandler: authenticated,
+      schema: {
+        response: { 401: errorResponseSchema },
+      },
+    },
+    getOrgChart,
+  );
+
+  app.get(
+    "/:id/reports",
+    {
+      preHandler: authenticated,
+      schema: {
+        params: employeeIdParamsSchema,
+        response: { 401: errorResponseSchema, 404: errorResponseSchema },
+      },
+    },
+    getDirectReports,
   );
 
   app.get(

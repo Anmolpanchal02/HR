@@ -24,6 +24,7 @@ import { findProjectByIdAndOrganization } from "../projects/project.repository.j
 import { findEmployeeByUserIdAndOrganization } from "../employees/employee.repository.js";
 import { UserRole, type AuthContext } from "../users/user.types.js";
 import { AppError } from "../../utils/app-error.js";
+import { isEmployeeRole, requireEmployeeId } from "../../utils/access-scope.js";
 import { getEmployeeDisplayMap, validateEmployeeInOrganization } from "../../utils/employee-lookup.js";
 import { Project } from "../projects/project.model.js";
 
@@ -105,7 +106,13 @@ export class TaskService {
   async listTasks(authUser: AuthContext, params: TaskQueryParams): Promise<TaskListResult> {
     const page = params.page ?? 1;
     const limit = params.limit ?? 20;
-    const { tasks, total } = await listTasksByOrganization(authUser.organizationId, params);
+    const scopedParams = { ...params };
+
+    if (isEmployeeRole(authUser.role)) {
+      scopedParams.assigneeId = await requireEmployeeId(authUser);
+    }
+
+    const { tasks, total } = await listTasksByOrganization(authUser.organizationId, scopedParams);
 
     const projectIds = [...new Set(tasks.map((t) => t.projectId.toString()))];
     const assigneeIds = tasks
@@ -149,6 +156,14 @@ export class TaskService {
     if (!task) {
       throw new AppError("Task not found", 404);
     }
+
+    if (isEmployeeRole(authUser.role)) {
+      const employeeId = await requireEmployeeId(authUser);
+      if (task.assigneeId?.toString() !== employeeId) {
+        throw new AppError("Forbidden", 403);
+      }
+    }
+
     return toTaskDetail(task, authUser.organizationId);
   }
 

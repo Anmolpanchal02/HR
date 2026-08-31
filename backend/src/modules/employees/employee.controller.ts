@@ -95,3 +95,25 @@ export async function updateEmployeeStatus(
     handleServiceError(error, reply);
   }
 }
+
+export async function getOrgChart(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+  try {
+    const chart = await employeeService.getOrgChart(getAuthUser(request));
+    reply.status(200).send(successDataResponse(chart));
+  } catch (error) {
+    handleServiceError(error, reply);
+  }
+}
+
+export async function getDirectReports(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
+  try {
+    const { id } = request.params as { id: string };
+    const result = await employeeService.getDirectReports(getAuthUser(request), id);
+    reply.status(200).send(successDataResponse(result));
+  } catch (error) {
+    handleServiceError(error, reply);
+  }
+}

@@ -16,6 +16,7 @@ import { ApiError } from "@/lib/api/client";
 import { useAuth } from "@/providers/auth-provider";
 import type { PaginationMeta, ProjectListItem, ProjectPriority, ProjectStatus } from "@/types/project";
 import { canManageProjects } from "@/types/project";
+import { isEmployeeRole } from "@/types/permissions";
 
 export default function ProjectsPage() {
   const { user } = useAuth();
@@ -61,7 +62,11 @@ export default function ProjectsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Projects"
-        description="Manage engineering and organizational projects."
+        description={
+          isEmployeeRole(user.role)
+            ? "Projects you own or have assigned tasks on."
+            : "Manage engineering and organizational projects."
+        }
         action={
           canManageProjects(user.role) && !showCreate ? (
             <Button onClick={() => setShowCreate(true)}>+ New Project</Button>

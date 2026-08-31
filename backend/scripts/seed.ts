@@ -24,6 +24,30 @@ import { generateSlug } from "../src/utils/slug.js";
 const ORG_NAME = "Acme Technologies";
 const DEFAULT_PASSWORD = "Password123";
 
+const STAFF_EMPLOYEE_PROFILES = [
+  {
+    email: "admin@acme.com",
+    firstName: "Admin",
+    lastName: "User",
+    department: "Operations",
+    jobTitle: "Administrator",
+  },
+  {
+    email: "hr@acme.com",
+    firstName: "HR",
+    lastName: "Manager",
+    department: "HR",
+    jobTitle: "HR Manager",
+  },
+  {
+    email: "eng@acme.com",
+    firstName: "Engineering",
+    lastName: "Lead",
+    department: "Engineering",
+    jobTitle: "Engineering Lead",
+  },
+] as const;
+
 const EMPLOYEE_SEED = [
   { firstName: "Rahul", lastName: "Sharma", department: "Engineering", jobTitle: "Software Engineer", location: "Bangalore" },
   { firstName: "Priya", lastName: "Singh", department: "HR", jobTitle: "HR Manager", location: "Mumbai" },
@@ -294,6 +318,95 @@ async function seedProjectsAndTasks(
   return { projects: projectsCreated, tasks: tasksCreated };
 }
 
+async function ensureStaffEmployeeProfiles(organizationId: mongoose.Types.ObjectId): Promise<void> {
+  const techLead = await Employee.findOne({ organizationId, jobTitle: "Tech Lead" }).select("_id");
+
+  for (const staff of STAFF_EMPLOYEE_PROFILES) {
+    const user = await User.findOne({ organizationId, email: staff.email });
+    if (!user) continue;
+
+    let employee = await Employee.findOne({ organizationId, userId: user._id });
+    if (!employee) {
+      const employeeCode = await generateEmployeeCode(organizationId.toString());
+      employee = await Employee.create({
+        organizationId,
+        userId: user._id,
+        employeeCode,
+        firstName: staff.firstName,
+        lastName: staff.lastName,
+        department: staff.department,
+        jobTitle: staff.jobTitle,
+        dateOfJoining: new Date(),
+        managerId: staff.email === "eng@acme.com" ? techLead?._id : undefined,
+        employmentType: EmploymentType.FULL_TIME,
+        status: EmployeeStatus.ACTIVE,
+      });
+      console.log(`Created employee profile for ${staff.email}`);
+    }
+
+    if (!user.employeeId || user.employeeId.toString() !== employee._id.toString()) {
+      await User.findByIdAndUpdate(user._id, { employeeId: employee._id });
+      console.log(`Linked employeeId for ${staff.email}`);
+    }
+  }
+}
+
+async function ensureSeedEmployeeUserLinks(organizationId: mongoose.Types.ObjectId): Promise<void> {
+  let managerEmployee: mongoose.Types.ObjectId | undefined = await Employee.findOne({
+    organizationId,
+    jobTitle: "Tech Lead",
+  }).select("_id").then((e) => e?._id);
+
+  for (const [index, person] of EMPLOYEE_SEED.entries()) {
+    const email = emailFromName(person.firstName, person.lastName);
+    const user = await User.findOne({ organizationId, email, role: UserRole.EMPLOYEE });
+    if (!user) continue;
+
+    let employee = await Employee.findOne({ organizationId, userId: user._id });
+    if (!employee) {
+      const employeeCode = await generateEmployeeCode(organizationId.toString());
+      const joinDate = new Date();
+      joinDate.setMonth(joinDate.getMonth() - (index + 1));
+
+      employee = await Employee.create({
+        organizationId,
+        userId: user._id,
+        employeeCode,
+        firstName: person.firstName,
+        lastName: person.lastName,
+        phone: `98765${String(10000 + index).slice(-5)}`,
+        department: person.department,
+        jobTitle: person.jobTitle,
+        dateOfJoining: joinDate,
+        managerId: index > 2 ? managerEmployee : undefined,
+        location: person.location,
+        employmentType:
+          index % 5 === 0
+            ? EmploymentType.CONTRACT
+            : index % 7 === 0
+              ? EmploymentType.PART_TIME
+              : EmploymentType.FULL_TIME,
+        status:
+          index === 16
+            ? EmployeeStatus.ON_LEAVE
+            : index === 17
+              ? EmployeeStatus.INACTIVE
+              : EmployeeStatus.ACTIVE,
+      });
+      console.log(`Linked seed employee profile for ${email}`);
+    }
+
+    if (person.jobTitle === "Tech Lead") {
+      managerEmployee = employee._id;
+    }
+
+    if (!user.employeeId || user.employeeId.toString() !== employee._id.toString()) {
+      await User.findByIdAndUpdate(user._id, { employeeId: employee._id });
+      console.log(`Linked employeeId for ${email}`);
+    }
+  }
+}
+
 async function seed(): Promise<void> {
   const fresh = process.argv.includes("--fresh");
 
@@ -318,6 +431,9 @@ async function seed(): Promise<void> {
       console.log(
         `Seed skipped — ${existingEmployees} employees and ${existingProjects} projects already exist for ${ORG_NAME}.`,
       );
+      await ensureStaffEmployeeProfiles(organization._id);
+      await ensureSeedEmployeeUserLinks(organization._id);
+      console.log("Ensured admin/hr/engineer and seed employee profiles are linked.");
       console.log("Run `npm run seed:fresh` to reset and re-seed.");
       await mongoose.disconnect();
       return;
@@ -439,6 +555,9 @@ async function seed(): Promise<void> {
 
   const totalProjects = await Project.countDocuments({ organizationId });
   const totalTasks = await Task.countDocuments({ organizationId });
+
+  await ensureStaffEmployeeProfiles(organizationId);
+  await ensureSeedEmployeeUserLinks(organizationId);
 
   console.log("\nSeed complete!");
   console.log(`Organization : ${ORG_NAME}`);

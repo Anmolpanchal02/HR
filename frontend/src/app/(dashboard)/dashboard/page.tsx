@@ -157,7 +157,9 @@ export default function DashboardPage() {
   const subtitle =
     user.role === "ENGINEER"
       ? "Your projects, tasks, and docs — ready to ship."
-      : "Here's what's happening in your organization.";
+      : user.role === "EMPLOYEE"
+        ? "Your assigned work and projects."
+        : "Here's what's happening in your organization.";
 
   return (
     <div className="space-y-8">

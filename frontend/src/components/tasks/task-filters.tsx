@@ -10,6 +10,7 @@ interface TaskFiltersProps {
   priority: TaskPriority | "";
   projects: Array<{ id: string; name: string; key: string }>;
   assignees: Array<{ id: string; name: string }>;
+  hideAssigneeFilter?: boolean;
   onSearchChange: (value: string) => void;
   onProjectChange: (value: string) => void;
   onAssigneeChange: (value: string) => void;
@@ -44,6 +45,7 @@ export function TaskFilters({
   priority,
   projects,
   assignees,
+  hideAssigneeFilter = false,
   onSearchChange,
   onProjectChange,
   onAssigneeChange,
@@ -79,19 +81,21 @@ export function TaskFilters({
             ))}
           </select>
         </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Assignee</label>
-          <select
-            value={assigneeId}
-            onChange={(e) => onAssigneeChange(e.target.value)}
-            className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
-          >
-            <option value="">All assignees</option>
-            {assignees.map((a) => (
-              <option key={a.id} value={a.id}>{a.name}</option>
-            ))}
-          </select>
-        </div>
+        {!hideAssigneeFilter && (
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Assignee</label>
+            <select
+              value={assigneeId}
+              onChange={(e) => onAssigneeChange(e.target.value)}
+              className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
+            >
+              <option value="">All assignees</option>
+              {assignees.map((a) => (
+                <option key={a.id} value={a.id}>{a.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="space-y-1">
           <label className="text-xs font-medium text-muted-foreground">Status</label>
           <select

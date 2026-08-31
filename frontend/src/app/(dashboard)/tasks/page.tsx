@@ -19,6 +19,7 @@ import { useAuth } from "@/providers/auth-provider";
 import type { PaginationMeta } from "@/types/project";
 import type { TaskListItem, TaskPriority, TaskStatus } from "@/types/task";
 import { canCreateTasks } from "@/types/task";
+import { isEmployeeRole } from "@/types/permissions";
 
 export default function TasksPage() {
   const { user } = useAuth();
@@ -37,6 +38,8 @@ export default function TasksPage() {
   const [priority, setPriority] = useState<TaskPriority | "">("");
   const [page, setPage] = useState(1);
 
+  const employeeView = user ? isEmployeeRole(user.role) : false;
+
   const loadTasks = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -46,7 +49,7 @@ export default function TasksPage() {
         limit: 20,
         search: search || undefined,
         projectId: projectId || undefined,
-        assigneeId: assigneeId || undefined,
+        assigneeId: employeeView ? undefined : assigneeId || undefined,
         status: status || undefined,
         priority: priority || undefined,
       });
@@ -57,20 +60,22 @@ export default function TasksPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, projectId, assigneeId, status, priority]);
+  }, [page, search, projectId, assigneeId, status, priority, employeeView]);
 
   useEffect(() => {
     void listProjects({ limit: 100 }).then((r) => setProjects(r.data.projects));
-    void listEmployees({ limit: 100, status: "ACTIVE" })
-      .then((r) =>
-        setAssignees(
-          r.data.employees.map((e) => ({ id: e.id, name: `${e.firstName} ${e.lastName}` })),
-        ),
-      )
-      .catch(() => setAssignees([]));
+    if (!employeeView) {
+      void listEmployees({ limit: 100, status: "ACTIVE" })
+        .then((r) =>
+          setAssignees(
+            r.data.employees.map((e) => ({ id: e.id, name: `${e.firstName} ${e.lastName}` })),
+          ),
+        )
+        .catch(() => setAssignees([]));
+    }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- load tasks from API
     void loadTasks();
-  }, [loadTasks]);
+  }, [loadTasks, employeeView]);
 
   if (!user) return <TableSkeleton />;
 
@@ -78,7 +83,11 @@ export default function TasksPage() {
     <div className="space-y-6">
       <PageHeader
         title="Tasks"
-        description="Track and manage work across your organization."
+        description={
+          employeeView
+            ? "Tasks assigned to you across your projects."
+            : "Track and manage work across your organization."
+        }
         action={
           canCreateTasks(user.role) && !showCreate ? (
             <Button onClick={() => setShowCreate(true)}>+ New Task</Button>
@@ -94,6 +103,7 @@ export default function TasksPage() {
         priority={priority}
         projects={projects}
         assignees={assignees}
+        hideAssigneeFilter={employeeView}
         onSearchChange={setSearch}
         onProjectChange={setProjectId}
         onAssigneeChange={setAssigneeId}
@@ -121,7 +131,14 @@ export default function TasksPage() {
       {loading ? (
         <TableSkeleton />
       ) : tasks.length === 0 ? (
-        <EmptyState title="No tasks found" description="Try adjusting filters or create a new task." />
+        <EmptyState
+          title="No tasks found"
+          description={
+            employeeView
+              ? "You have no assigned tasks yet."
+              : "Try adjusting filters or create a new task."
+          }
+        />
       ) : (
         <>
           <TaskTable tasks={tasks} />

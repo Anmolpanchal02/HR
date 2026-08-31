@@ -80,6 +80,49 @@ export async function listTasksByOrganization(
   return { tasks, total };
 }
 
+export async function listDistinctProjectIdsForAssignee(
+  organizationId: string,
+  assigneeId: string,
+): Promise<string[]> {
+  const projectIds = await Task.distinct("projectId", { organizationId, assigneeId });
+  return projectIds.map((id) => id.toString());
+}
+
+export async function employeeHasTaskInProject(
+  organizationId: string,
+  projectId: string,
+  assigneeId: string,
+): Promise<boolean> {
+  const task = await Task.findOne({ organizationId, projectId, assigneeId }).select("_id");
+  return Boolean(task);
+}
+
+export async function getTaskSummaryByProjectForAssignee(
+  projectId: string,
+  organizationId: string,
+  assigneeId: string,
+): Promise<TaskSummary> {
+  const summary = emptyTaskSummary();
+  const rows = await Task.aggregate<{ _id: TaskStatus; count: number }>([
+    {
+      $match: {
+        projectId: new Types.ObjectId(projectId),
+        organizationId: new Types.ObjectId(organizationId),
+        assigneeId: new Types.ObjectId(assigneeId),
+      },
+    },
+    { $group: { _id: "$status", count: { $sum: 1 } } },
+  ]);
+
+  for (const row of rows) {
+    if (row._id in summary) {
+      summary[row._id as keyof TaskSummary] = row.count;
+    }
+  }
+
+  return summary;
+}
+
 export async function listTasksByProjectAndOrganization(
   projectId: string,
   organizationId: string,

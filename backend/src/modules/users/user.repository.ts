@@ -14,6 +14,7 @@ export interface CreateUserInput {
 export interface UpdateUserInput {
   name?: string;
   role?: UserRole;
+  employeeId?: Types.ObjectId;
 }
 
 export async function createUser(input: CreateUserInput): Promise<IUser> {

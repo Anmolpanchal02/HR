@@ -51,10 +51,17 @@ function applyDomTheme(resolved: ResolvedTheme) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemePreference>(readStoredPreference);
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
-    resolveTheme(readStoredPreference()),
-  );
+  // Stable SSR + first client paint (localStorage read happens in useEffect only).
+  const [theme, setThemeState] = useState<ThemePreference>("system");
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("light");
+
+  useEffect(() => {
+    const stored = readStoredPreference();
+    const resolved = resolveTheme(stored);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync theme from localStorage after hydration
+    setThemeState(stored);
+    setResolvedTheme(resolved);
+  }, []);
 
   useEffect(() => {
     applyDomTheme(resolvedTheme);

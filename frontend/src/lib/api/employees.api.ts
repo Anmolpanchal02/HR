@@ -6,6 +6,7 @@ import type {
   EmployeeListParams,
   EmployeeProfile,
   EmployeeStatus,
+  OrgChartNode,
   PaginationMeta,
 } from "@/types/employee";
 
@@ -43,4 +44,10 @@ export async function updateEmployeeStatus(
   status: EmployeeStatus,
 ): Promise<ApiDataResponse<{ employee: EmployeeProfile }>> {
   return apiClient.patch(`/employees/${id}/status`, { status }, true);
+}
+
+export async function getOrgChart(): Promise<
+  ApiDataResponse<{ roots: OrgChartNode[]; totalEmployees: number }>
+> {
+  return apiClient.get("/employees/org-chart", true);
 }

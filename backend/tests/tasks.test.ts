@@ -221,6 +221,71 @@ describe("Tasks API", () => {
       expect(body.tasks).toHaveLength(2);
       expect(body.pagination.total).toBe(3);
     });
+
+    it("returns only assigned tasks for EMPLOYEE", async () => {
+      const admin = await registerOrganization(app, { email: "admin@emp-list-task.com" });
+      const projectId = await setupProject(admin.token);
+      const employeeRes = await createEmployeeWithKnownPassword(
+        app,
+        admin.token,
+        "emp@emp-list-task.com",
+        validPassword,
+      );
+      const assigneeId = employeeRes.json().data.employee.id as string;
+      const empToken = await loginViaApi(app, "emp@emp-list-task.com", validPassword);
+
+      await createTaskViaApi(app, admin.token, projectId, {
+        title: "Assigned to employee",
+        assigneeId,
+      });
+      await createTaskViaApi(app, admin.token, projectId, {
+        title: "Assigned to someone else",
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: "/api/v1/tasks",
+        headers: authHeader(empToken),
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().data.tasks).toHaveLength(1);
+      expect(response.json().data.tasks[0].title).toBe("Assigned to employee");
+    });
+
+    it("ignores assigneeId override from EMPLOYEE client", async () => {
+      const admin = await registerOrganization(app, { email: "admin@emp-override.com" });
+      const projectId = await setupProject(admin.token);
+      const employeeA = await createEmployeeViaApi(app, admin.token, { email: "empa@override.com" });
+      const employeeB = await createEmployeeWithKnownPassword(
+        app,
+        admin.token,
+        "empb@override.com",
+        validPassword,
+      );
+      const assigneeB = employeeB.json().data.employee.id as string;
+      const assigneeA = employeeA.json().data.employee.id as string;
+      const empToken = await loginViaApi(app, "empb@override.com", validPassword);
+
+      await createTaskViaApi(app, admin.token, projectId, {
+        title: "Task for A",
+        assigneeId: assigneeA,
+      });
+      await createTaskViaApi(app, admin.token, projectId, {
+        title: "Task for B",
+        assigneeId: assigneeB,
+      });
+
+      const response = await app.inject({
+        method: "GET",
+        url: `/api/v1/tasks?assigneeId=${assigneeA}`,
+        headers: authHeader(empToken),
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().data.tasks).toHaveLength(1);
+      expect(response.json().data.tasks[0].title).toBe("Task for B");
+    });
   });
 
   describe("GET /api/v1/tasks/:id", () => {
@@ -241,6 +306,25 @@ describe("Tasks API", () => {
       expect(response.statusCode).toBe(200);
       expect(response.json().data.task.project?.key).toBe("PAY");
       expect(response.json().data.task.assignee?.name).toContain("Rahul");
+    });
+
+    it("blocks EMPLOYEE from task not assigned to them", async () => {
+      const admin = await registerOrganization(app, { email: "admin@emp-get-task.com" });
+      const projectId = await setupProject(admin.token);
+      await createEmployeeWithKnownPassword(app, admin.token, "emp@emp-get-task.com", validPassword);
+      const empToken = await loginViaApi(app, "emp@emp-get-task.com", validPassword);
+      const created = await createTaskViaApi(app, admin.token, projectId, {
+        title: "Not assigned",
+      });
+      const taskId = created.json().data.task.id as string;
+
+      const response = await app.inject({
+        method: "GET",
+        url: `/api/v1/tasks/${taskId}`,
+        headers: authHeader(empToken),
+      });
+
+      expect(response.statusCode).toBe(403);
     });
   });
 

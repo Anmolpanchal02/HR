@@ -165,10 +165,27 @@ describe("Projects API", () => {
   });
 
   describe("GET /api/v1/projects", () => {
-    it("allows authenticated users to list projects", async () => {
+    it("returns only accessible projects for EMPLOYEE", async () => {
       const admin = await registerOrganization(app, { email: "admin@list-proj.com" });
       await createProjectViaApi(app, admin.token, { key: "A1", name: "Alpha" });
-      const empToken = await createEmployeeUser(admin.token, "emp@list-proj.com");
+      await createProjectViaApi(app, admin.token, { key: "B1", name: "Beta" });
+      const employeeRes = await createEmployeeWithKnownPassword(
+        app,
+        admin.token,
+        "emp@list-proj.com",
+        validPassword,
+      );
+      const employeeId = employeeRes.json().data.employee.id as string;
+      const empToken = await loginViaApi(app, "emp@list-proj.com", validPassword);
+      const projectA = (
+        await app.inject({
+          method: "GET",
+          url: "/api/v1/projects?search=Alpha",
+          headers: authHeader(admin.token),
+        })
+      ).json().data.projects[0].id as string;
+
+      await createTaskViaApi(app, admin.token, projectA, { assigneeId: employeeId });
 
       const response = await app.inject({
         method: "GET",
@@ -178,6 +195,22 @@ describe("Projects API", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response.json().data.projects).toHaveLength(1);
+      expect(response.json().data.projects[0].key).toBe("A1");
+    });
+
+    it("blocks EMPLOYEE from project detail without access", async () => {
+      const admin = await registerOrganization(app, { email: "admin@proj-detail.com" });
+      const created = await createProjectViaApi(app, admin.token, { key: "LOCK" });
+      const projectId = created.json().data.project.id as string;
+      const empToken = await createEmployeeUser(admin.token, "emp@proj-detail.com");
+
+      const response = await app.inject({
+        method: "GET",
+        url: `/api/v1/projects/${projectId}`,
+        headers: authHeader(empToken),
+      });
+
+      expect(response.statusCode).toBe(403);
     });
 
     it("enforces tenant isolation", async () => {

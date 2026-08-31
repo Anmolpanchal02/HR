@@ -8,6 +8,7 @@ export interface User {
   organizationId: string;
   organizationName?: string;
   employeeId?: string;
+  hasDirectReports?: boolean;
 }
 
 export interface ApiErrorResponse {

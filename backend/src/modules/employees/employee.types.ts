@@ -63,3 +63,21 @@ export interface EmployeeQueryParams {
   department?: string;
   status?: EmployeeStatus;
 }
+
+export interface OrgChartNode {
+  id: string;
+  name: string;
+  jobTitle: string;
+  department: string;
+  managerId?: string;
+  status: EmployeeStatus;
+  children: OrgChartNode[];
+}
+
+export interface DirectReportItem {
+  id: string;
+  name: string;
+  jobTitle: string;
+  department: string;
+  status: EmployeeStatus;
+}

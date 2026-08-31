@@ -7,6 +7,8 @@ import {
   getEmployeeEmail,
   getManagerName,
   listEmployeesByOrganization,
+  listActiveEmployeesByOrganization,
+  findDirectReportsByManager,
   updateEmployeeByIdAndOrganization,
   type CreateEmployeeInput,
   type UpdateEmployeeInput,
@@ -19,6 +21,8 @@ import {
   type EmployeeListResult,
   type EmployeeProfile,
   type EmployeeQueryParams,
+  type DirectReportItem,
+  type OrgChartNode,
 } from "./employee.types.js";
 import type { IEmployee } from "./employee.model.js";
 import { createUser, updateUserByIdAndOrganization, updateUserStatusByIdAndOrganization } from "../users/user.repository.js";
@@ -366,6 +370,63 @@ export class EmployeeService {
     );
 
     return toEmployeeProfile(updated, authUser.organizationId);
+  }
+
+  async getOrgChart(authUser: AuthContext): Promise<{ roots: OrgChartNode[]; totalEmployees: number }> {
+    const employees = await listActiveEmployeesByOrganization(authUser.organizationId);
+    const emailMap = new Map<string, string>();
+    await Promise.all(
+      employees.map(async (employee) => {
+        const email = (await getEmployeeEmail(employee.userId)) ?? "";
+        emailMap.set(employee._id.toString(), email);
+      }),
+    );
+
+    const nodes = new Map<string, OrgChartNode>();
+    for (const employee of employees) {
+      nodes.set(employee._id.toString(), {
+        id: employee._id.toString(),
+        name: `${employee.firstName} ${employee.lastName}`,
+        jobTitle: employee.jobTitle,
+        department: employee.department,
+        managerId: employee.managerId?.toString(),
+        status: employee.status,
+        children: [],
+      });
+    }
+
+    const roots: OrgChartNode[] = [];
+    for (const employee of employees) {
+      const node = nodes.get(employee._id.toString());
+      if (!node) continue;
+      const managerId = employee.managerId?.toString();
+      if (managerId && nodes.has(managerId)) {
+        nodes.get(managerId)!.children.push(node);
+      } else {
+        roots.push(node);
+      }
+    }
+
+    return { roots, totalEmployees: employees.length };
+  }
+
+  async getDirectReports(
+    authUser: AuthContext,
+    employeeId: string,
+  ): Promise<{ reports: DirectReportItem[] }> {
+    const employee = await findEmployeeByIdAndOrganization(employeeId, authUser.organizationId);
+    if (!employee) throw new AppError("Employee not found", 404);
+
+    const reports = await findDirectReportsByManager(employeeId, authUser.organizationId);
+    return {
+      reports: reports.map((report) => ({
+        id: report._id.toString(),
+        name: `${report.firstName} ${report.lastName}`,
+        jobTitle: report.jobTitle,
+        department: report.department,
+        status: report.status,
+      })),
+    };
   }
 }
 

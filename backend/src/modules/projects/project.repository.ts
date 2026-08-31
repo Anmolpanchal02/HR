@@ -74,3 +74,39 @@ export async function listProjectsByOrganization(
 
   return { projects, total };
 }
+
+export async function listProjectsForEmployee(
+  organizationId: string,
+  employeeId: string,
+  accessibleProjectIds: string[],
+  params: ProjectQueryParams,
+): Promise<{ projects: IProject[]; total: number }> {
+  const page = Math.max(params.page ?? 1, 1);
+  const limit = Math.min(Math.max(params.limit ?? 20, 1), 100);
+  const skip = (page - 1) * limit;
+
+  const accessScope: FilterQuery<IProject>[] = [{ ownerId: employeeId }];
+  if (accessibleProjectIds.length > 0) {
+    accessScope.push({ _id: { $in: accessibleProjectIds } });
+  }
+
+  const filter: FilterQuery<IProject> = {
+    organizationId,
+    $or: accessScope,
+  };
+
+  if (params.status) filter.status = params.status;
+  if (params.priority) filter.priority = params.priority;
+
+  if (params.search) {
+    const regex = new RegExp(params.search.trim(), "i");
+    filter.$and = [{ $or: [{ name: regex }, { key: regex }, { description: regex }] }];
+  }
+
+  const [projects, total] = await Promise.all([
+    Project.find(filter).sort({ updatedAt: -1 }).skip(skip).limit(limit),
+    Project.countDocuments(filter),
+  ]);
+
+  return { projects, total };
+}

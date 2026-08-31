@@ -17,6 +17,7 @@ export interface SafeUser {
   organizationId: string;
   organizationName?: string;
   employeeId?: string;
+  hasDirectReports?: boolean;
 }
 
 export interface MemberUser {
