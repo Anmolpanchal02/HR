@@ -4,6 +4,7 @@ import {
 } from "../organizations/organization.repository.js";
 import { findEmployeeByUserIdAndOrganization } from "../employees/employee.repository.js";
 import { Employee } from "../employees/employee.model.js";
+import { EmployeeStatus } from "../employees/employee.types.js";
 import { UserRole, type AuthContext } from "../users/user.types.js";
 import { AppError } from "../../utils/app-error.js";
 import { getEmployeeDisplayMap } from "../../utils/employee-lookup.js";
@@ -232,6 +233,7 @@ export class AttendanceService {
     const reports = await Employee.find({
       organizationId: authUser.organizationId,
       managerId: employee._id,
+      status: { $ne: EmployeeStatus.TERMINATED },
     }).select("_id");
 
     if (reports.length === 0 && !canViewAllAttendance(authUser.role)) {

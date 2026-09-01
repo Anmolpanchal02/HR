@@ -23,6 +23,11 @@ export interface EmployeeProfile {
   updatedAt: string;
 }
 
+export interface CreateEmployeeResult {
+  employee: EmployeeProfile;
+  temporaryPassword: string;
+}
+
 export interface EmployeeListItem {
   id: string;
   employeeCode: string;
@@ -65,6 +70,7 @@ export interface CreateEmployeePayload {
   employmentType: EmploymentType;
   managerId?: string;
   location?: string;
+  password?: string;
 }
 
 export function canManageEmployees(role: string): boolean {

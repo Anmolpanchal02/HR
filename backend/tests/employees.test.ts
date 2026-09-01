@@ -43,9 +43,13 @@ describe("Employees API", () => {
       });
 
       expect(response.statusCode).toBe(201);
-      const employee = response.json().data.employee;
+      const body = response.json().data;
+      const employee = body.employee;
       expect(employee.employeeCode).toMatch(/^EMP-/);
       expect(employee.email).toBe("rahul@emp.com");
+      expect(body.temporaryPassword).toBeDefined();
+      expect(typeof body.temporaryPassword).toBe("string");
+      expect(body.temporaryPassword.length).toBeGreaterThan(8);
 
       const user = await User.findOne({ email: "rahul@emp.com" }).select("+passwordHash");
       expect(user?.role).toBe(UserRole.EMPLOYEE);
@@ -94,6 +98,31 @@ describe("Employees API", () => {
         email: "blocked@eng-block.com",
       });
       expect(response.statusCode).toBe(403);
+    });
+
+    it("allows ADMIN to create employee with custom password", async () => {
+      const admin = await registerOrganization(app, { email: "admin@custom-pass.com" });
+      const customPassword = "CustomPass1";
+      const response = await createEmployeeViaApi(app, admin.token, {
+        email: "custom@emp.com",
+        password: customPassword,
+      });
+
+      expect(response.statusCode).toBe(201);
+      expect(response.json().data.temporaryPassword).toBe(customPassword);
+
+      const token = await loginViaApi(app, "custom@emp.com", customPassword);
+      expect(token).toBeDefined();
+    });
+
+    it("returns 400 for weak custom password on create", async () => {
+      const admin = await registerOrganization(app, { email: "admin@weak-pass.com" });
+      const response = await createEmployeeViaApi(app, admin.token, {
+        email: "weak@emp.com",
+        password: "short",
+      });
+
+      expect(response.statusCode).toBe(400);
     });
 
     it("returns 409 for duplicate email in organization", async () => {
@@ -216,6 +245,63 @@ describe("Employees API", () => {
         url: "/api/v1/employees",
         headers: authHeader(token),
       });
+      expect(response.statusCode).toBe(403);
+    });
+  });
+
+  describe("POST /api/v1/employees/:id/reset-password", () => {
+    it("allows ADMIN to reset employee login password", async () => {
+      const admin = await registerOrganization(app, { email: "admin@reset.com" });
+      const created = await createEmployeeViaApi(app, admin.token, { email: "worker@reset.com" });
+      const employeeId = created.json().data.employee.id as string;
+
+      const response = await app.inject({
+        method: "POST",
+        url: `/api/v1/employees/${employeeId}/reset-password`,
+        headers: authHeader(admin.token),
+        payload: {},
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().data.email).toBe("worker@reset.com");
+      expect(response.json().data.temporaryPassword).toBeDefined();
+      expect(typeof response.json().data.temporaryPassword).toBe("string");
+    });
+
+    it("allows ADMIN to reset with custom password", async () => {
+      const admin = await registerOrganization(app, { email: "admin@custom-reset.com" });
+      const created = await createEmployeeViaApi(app, admin.token, { email: "worker@custom-reset.com" });
+      const employeeId = created.json().data.employee.id as string;
+      const customPassword = "ResetPass9";
+
+      const response = await app.inject({
+        method: "POST",
+        url: `/api/v1/employees/${employeeId}/reset-password`,
+        headers: authHeader(admin.token),
+        payload: { password: customPassword },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().data.temporaryPassword).toBe(customPassword);
+
+      const token = await loginViaApi(app, "worker@custom-reset.com", customPassword);
+      expect(token).toBeDefined();
+    });
+
+    it("returns 403 when EMPLOYEE tries to reset password", async () => {
+      const admin = await registerOrganization(app, { email: "admin@reset-forbid.com" });
+      const created = await createEmployeeViaApi(app, admin.token, { email: "worker@reset-forbid.com" });
+      const employeeId = created.json().data.employee.id as string;
+      await createEmployeeWithKnownPassword(app, admin.token, "other@reset-forbid.com", validPassword);
+      const otherToken = await loginViaApi(app, "other@reset-forbid.com", validPassword);
+
+      const response = await app.inject({
+        method: "POST",
+        url: `/api/v1/employees/${employeeId}/reset-password`,
+        headers: authHeader(otherToken),
+        payload: {},
+      });
+
       expect(response.statusCode).toBe(403);
     });
   });

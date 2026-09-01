@@ -2,6 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 
 import type {
   CreateEmployeeRequest,
+  ResetEmployeePasswordRequest,
   UpdateEmployeeRequest,
   UpdateEmployeeStatusRequest,
 } from "./employee.service.js";
@@ -57,8 +58,26 @@ export async function createEmployee(
 ): Promise<void> {
   try {
     const body = request.body as CreateEmployeeRequest;
-    const employee = await employeeService.createEmployee(getAuthUser(request), body);
-    reply.status(201).send(successDataResponse({ employee }));
+    const result = await employeeService.createEmployee(getAuthUser(request), body);
+    reply.status(201).send(successDataResponse(result));
+  } catch (error) {
+    handleServiceError(error, reply);
+  }
+}
+
+export async function resetEmployeePassword(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
+  try {
+    const { id } = request.params as { id: string };
+    const body = (request.body ?? {}) as ResetEmployeePasswordRequest;
+    const credentials = await employeeService.resetEmployeePassword(
+      getAuthUser(request),
+      id,
+      body,
+    );
+    reply.status(200).send(successDataResponse(credentials));
   } catch (error) {
     handleServiceError(error, reply);
   }

@@ -23,12 +23,25 @@ import {
   type EmployeeQueryParams,
   type DirectReportItem,
   type OrgChartNode,
+  type CreateEmployeeResult,
 } from "./employee.types.js";
 import type { IEmployee } from "./employee.model.js";
-import { createUser, updateUserByIdAndOrganization, updateUserStatusByIdAndOrganization } from "../users/user.repository.js";
+import { createUser, findUserByIdAndOrganization, updateUserByIdAndOrganization, updateUserPasswordByIdAndOrganization, updateUserStatusByIdAndOrganization } from "../users/user.repository.js";
 import { UserRole, type AuthContext } from "../users/user.types.js";
 import { AppError } from "../../utils/app-error.js";
-import { hashPassword } from "../../utils/password.js";
+import { hashPassword, validatePasswordStrength } from "../../utils/password.js";
+
+function resolveEmployeePassword(customPassword?: string): string {
+  const trimmed = customPassword?.trim();
+  if (trimmed) {
+    const passwordError = validatePasswordStrength(trimmed);
+    if (passwordError) {
+      throw new AppError(passwordError, 400);
+    }
+    return trimmed;
+  }
+  return generateTemporaryPassword();
+}
 
 export interface CreateEmployeeRequest {
   firstName: string;
@@ -41,6 +54,11 @@ export interface CreateEmployeeRequest {
   employmentType: EmploymentType;
   managerId?: string;
   location?: string;
+  password?: string;
+}
+
+export interface ResetEmployeePasswordRequest {
+  password?: string;
 }
 
 export interface UpdateEmployeeRequest {
@@ -74,6 +92,45 @@ function canViewEmployee(authUser: AuthContext, employee: IEmployee): boolean {
   }
 
   return false;
+}
+
+function countOrgChartNodes(node: OrgChartNode): number {
+  return 1 + node.children.reduce((sum, child) => sum + countOrgChartNodes(child), 0);
+}
+
+function findOrgChartNode(roots: OrgChartNode[], employeeId: string): OrgChartNode | undefined {
+  for (const root of roots) {
+    if (root.id === employeeId) return root;
+    const nested = findOrgChartNode(root.children, employeeId);
+    if (nested) return nested;
+  }
+  return undefined;
+}
+
+function buildSelfAndManagerChain(
+  nodes: Map<string, OrgChartNode>,
+  employeeId: string,
+): OrgChartNode[] {
+  const chain: OrgChartNode[] = [];
+  let currentId: string | undefined = employeeId;
+
+  while (currentId) {
+    const node = nodes.get(currentId);
+    if (!node) break;
+    chain.unshift({ ...node, children: [] });
+    currentId = node.managerId;
+  }
+
+  for (let index = 0; index < chain.length - 1; index += 1) {
+    const current = chain[index];
+    const next = chain[index + 1];
+    if (current && next) {
+      current.children = [next];
+    }
+  }
+
+  const root = chain[0];
+  return root ? [root] : [];
 }
 
 async function toEmployeeProfile(
@@ -202,10 +259,47 @@ export class EmployeeService {
     return toEmployeeProfile(employee, authUser.organizationId);
   }
 
+  async resetEmployeePassword(
+    authUser: AuthContext,
+    employeeId: string,
+    input: ResetEmployeePasswordRequest = {},
+  ): Promise<{ email: string; temporaryPassword: string }> {
+    if (!canManageEmployees(authUser.role)) {
+      throw new AppError("Forbidden", 403);
+    }
+
+    const employee = await findEmployeeByIdAndOrganization(employeeId, authUser.organizationId);
+    if (!employee) {
+      throw new AppError("Employee not found", 404);
+    }
+
+    const user = await findUserByIdAndOrganization(
+      employee.userId.toString(),
+      authUser.organizationId,
+    );
+    if (!user) {
+      throw new AppError("Linked user account not found", 404);
+    }
+    if (!user.isActive) {
+      throw new AppError("Cannot reset password for a deactivated account", 400);
+    }
+
+    const temporaryPassword = resolveEmployeePassword(input.password);
+    const passwordHash = await hashPassword(temporaryPassword);
+    await updateUserPasswordByIdAndOrganization(
+      user._id.toString(),
+      authUser.organizationId,
+      passwordHash,
+    );
+
+    const email = (await getEmployeeEmail(employee.userId)) ?? user.email;
+    return { email, temporaryPassword };
+  }
+
   async createEmployee(
     authUser: AuthContext,
     input: CreateEmployeeRequest,
-  ): Promise<EmployeeProfile> {
+  ): Promise<CreateEmployeeResult> {
     if (!canManageEmployees(authUser.role)) {
       throw new AppError("Forbidden", 403);
     }
@@ -216,7 +310,7 @@ export class EmployeeService {
     );
 
     const organizationObjectId = new mongoose.Types.ObjectId(authUser.organizationId);
-    const temporaryPassword = generateTemporaryPassword();
+    const temporaryPassword = resolveEmployeePassword(input.password);
     const passwordHash = await hashPassword(temporaryPassword);
     const fullName = `${input.firstName.trim()} ${input.lastName.trim()}`;
 
@@ -257,7 +351,10 @@ export class EmployeeService {
         { employeeId: createdEmployee._id },
       );
 
-      return toEmployeeProfile(createdEmployee, authUser.organizationId);
+      return {
+        employee: await toEmployeeProfile(createdEmployee, authUser.organizationId),
+        temporaryPassword,
+      };
     } catch (error) {
       if (createdEmployee) {
         await createdEmployee.deleteOne();
@@ -407,7 +504,33 @@ export class EmployeeService {
       }
     }
 
-    return { roots, totalEmployees: employees.length };
+    if (canManageEmployees(authUser.role)) {
+      return { roots, totalEmployees: employees.length };
+    }
+
+    const viewer = await findEmployeeByUserIdAndOrganization(
+      authUser.userId,
+      authUser.organizationId,
+    );
+    if (!viewer) {
+      throw new AppError("Employee profile required", 403);
+    }
+
+    const viewerId = viewer._id.toString();
+    const directReports = await findDirectReportsByManager(viewerId, authUser.organizationId);
+    if (directReports.length > 0) {
+      const subtree = findOrgChartNode(roots, viewerId);
+      return {
+        roots: subtree ? [subtree] : [],
+        totalEmployees: subtree ? countOrgChartNodes(subtree) : 0,
+      };
+    }
+
+    const scopedRoots = buildSelfAndManagerChain(nodes, viewerId);
+    return {
+      roots: scopedRoots,
+      totalEmployees: scopedRoots[0] ? countOrgChartNodes(scopedRoots[0]) : 0,
+    };
   }
 
   async getDirectReports(
@@ -416,6 +539,20 @@ export class EmployeeService {
   ): Promise<{ reports: DirectReportItem[] }> {
     const employee = await findEmployeeByIdAndOrganization(employeeId, authUser.organizationId);
     if (!employee) throw new AppError("Employee not found", 404);
+
+    if (!canManageEmployees(authUser.role)) {
+      const viewer = await findEmployeeByUserIdAndOrganization(
+        authUser.userId,
+        authUser.organizationId,
+      );
+      if (!viewer) throw new AppError("Employee not found", 404);
+
+      const isSelf = viewer._id.toString() === employeeId;
+      const isTheirManager = employee.managerId?.toString() === viewer._id.toString();
+      if (!isSelf && !isTheirManager) {
+        throw new AppError("Employee not found", 404);
+      }
+    }
 
     const reports = await findDirectReportsByManager(employeeId, authUser.organizationId);
     return {

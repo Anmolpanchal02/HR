@@ -71,6 +71,15 @@ export const createEmployeeBodySchema = {
     employmentType: employmentTypeSchema,
     managerId: { type: "string", minLength: 1 },
     location: { type: "string", maxLength: 100 },
+    password: { type: "string", minLength: 8, maxLength: 128 },
+  },
+} as const;
+
+export const resetEmployeePasswordBodySchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    password: { type: "string", minLength: 8, maxLength: 128 },
   },
 } as const;
 

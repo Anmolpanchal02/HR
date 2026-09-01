@@ -55,6 +55,18 @@ export async function updateUserByIdAndOrganization(
   });
 }
 
+export async function updateUserPasswordByIdAndOrganization(
+  id: string,
+  organizationId: string,
+  passwordHash: string,
+): Promise<IUser | null> {
+  return User.findOneAndUpdate(
+    { _id: id, organizationId },
+    { passwordHash },
+    { new: true, runValidators: true },
+  );
+}
+
 export async function updateUserStatusByIdAndOrganization(
   id: string,
   organizationId: string,

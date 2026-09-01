@@ -155,7 +155,6 @@ export class LeaveService {
 
     const { requests, total } = await listPendingForApprover(
       authUser.organizationId,
-      employee._id.toString(),
       directReports.map((report) => report._id.toString()),
       params,
     );

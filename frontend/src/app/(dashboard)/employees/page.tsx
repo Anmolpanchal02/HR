@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { EmployeeFilters } from "@/components/employees/employee-filters";
 import { EmployeeForm } from "@/components/employees/employee-form";
+import { storeEmployeeCredentials } from "@/components/employees/employee-login-access";
 import { EmployeeTable } from "@/components/employees/employee-table";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -100,9 +101,13 @@ export default function EmployeesPage() {
         <EmployeeForm
           defaultOpen
           onCancel={() => setShowCreate(false)}
-          onCreated={() => {
+          onCreated={(result) => {
+            storeEmployeeCredentials(result.employee.id, {
+              email: result.employee.email,
+              temporaryPassword: result.temporaryPassword,
+            });
             setShowCreate(false);
-            void loadEmployees();
+            router.push(`/employees/${result.employee.id}`);
           }}
         />
       )}

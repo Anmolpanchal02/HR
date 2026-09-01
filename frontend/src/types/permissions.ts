@@ -16,8 +16,17 @@ export function canReviewLeave(role: UserRole, hasDirectReports?: boolean): bool
   return isPeopleOpsRole(role) || Boolean(hasDirectReports);
 }
 
-export function canViewTeamAttendance(role: UserRole, hasDirectReports?: boolean): boolean {
-  return isPeopleOpsRole(role) || Boolean(hasDirectReports);
+export function canViewTeamAttendance(_role: UserRole, hasDirectReports?: boolean): boolean {
+  return Boolean(hasDirectReports);
+}
+
+export function canViewEmployeeProfile(
+  role: UserRole,
+  viewerEmployeeId: string | undefined,
+  targetEmployeeId: string,
+): boolean {
+  if (isPeopleOpsRole(role)) return true;
+  return Boolean(viewerEmployeeId && viewerEmployeeId === targetEmployeeId);
 }
 
 export function isEmployeeRole(role: UserRole): boolean {

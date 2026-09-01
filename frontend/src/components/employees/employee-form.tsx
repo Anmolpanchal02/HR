@@ -4,10 +4,10 @@ import { useState, type FormEvent } from "react";
 
 import { createEmployee } from "@/lib/api/employees.api";
 import { ApiError } from "@/lib/api/client";
-import type { EmployeeProfile, EmploymentType } from "@/types/employee";
+import type { CreateEmployeeResult, EmploymentType } from "@/types/employee";
 
 interface EmployeeFormProps {
-  onCreated: (employee: EmployeeProfile) => void;
+  onCreated: (result: CreateEmployeeResult) => void;
   defaultOpen?: boolean;
   onCancel?: () => void;
 }
@@ -33,6 +33,7 @@ export function EmployeeForm({ onCreated, defaultOpen = false, onCancel }: Emplo
     dateOfJoining: new Date().toISOString().split("T")[0] ?? "",
     employmentType: "FULL_TIME" as EmploymentType,
     location: "",
+    password: "",
   });
 
   async function handleSubmit(event: FormEvent) {
@@ -51,8 +52,9 @@ export function EmployeeForm({ onCreated, defaultOpen = false, onCancel }: Emplo
         dateOfJoining: form.dateOfJoining,
         employmentType: form.employmentType,
         location: form.location.trim() || undefined,
+        password: form.password.trim() || undefined,
       });
-      onCreated(response.data.employee);
+      onCreated(response.data);
       setOpen(false);
       onCancel?.();
       setForm({
@@ -65,6 +67,7 @@ export function EmployeeForm({ onCreated, defaultOpen = false, onCancel }: Emplo
         dateOfJoining: new Date().toISOString().split("T")[0] ?? "",
         employmentType: "FULL_TIME",
         location: "",
+        password: "",
       });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to create employee");
@@ -142,6 +145,21 @@ export function EmployeeForm({ onCreated, defaultOpen = false, onCancel }: Emplo
               </option>
             ))}
           </select>
+        </div>
+        <div className="space-y-1 sm:col-span-2">
+          <label className="text-xs font-medium text-muted-foreground">
+            Login password (optional)
+          </label>
+          <input
+            type="password"
+            value={form.password}
+            onChange={(e) => setForm((current) => ({ ...current, password: e.target.value }))}
+            placeholder="Leave blank to auto-generate"
+            className="w-full rounded-lg border border-input bg-surface px-3 py-2 text-sm text-foreground"
+          />
+          <p className="text-xs text-muted-foreground">
+            Min 8 characters with uppercase, lowercase, and a number.
+          </p>
         </div>
       </div>
 

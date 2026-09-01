@@ -193,7 +193,7 @@ export const createEmployeeTool = {
     }
 
     try {
-      const employee = await employeeService.createEmployee(toAuthContext(context), {
+      const result = await employeeService.createEmployee(toAuthContext(context), {
         firstName,
         lastName,
         email,
@@ -206,8 +206,11 @@ export const createEmployeeTool = {
         managerId: typeof args.managerId === "string" ? args.managerId : undefined,
       });
       return toolSuccess(
-        employeeSummary(employee),
-        `Created employee ${employee.firstName} ${employee.lastName} (${employee.employeeCode})`,
+        {
+          ...employeeSummary(result.employee),
+          temporaryPassword: result.temporaryPassword,
+        },
+        `Created employee ${result.employee.firstName} ${result.employee.lastName}. Share the temporary password with them.`,
       );
     } catch (error) {
       return toolFailureFromError(error, "Create employee failed");

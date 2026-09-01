@@ -20,7 +20,7 @@ export const defaultEmployeePayload = {
 export async function createEmployeeViaApi(
   app: App,
   token: string,
-  overrides: Partial<typeof defaultEmployeePayload & { managerId?: string }> = {},
+  overrides: Partial<typeof defaultEmployeePayload & { managerId?: string; password?: string }> = {},
   headers?: InjectOptions["headers"],
 ) {
   const email = overrides.email ?? `employee-${Date.now()}@example.com`;
@@ -45,8 +45,8 @@ export async function createEmployeeWithKnownPassword(
   email: string,
   password: string,
 ) {
-  const response = await createEmployeeViaApi(app, adminToken, { email });
-  if (response.statusCode === 201) {
+  const response = await createEmployeeViaApi(app, adminToken, { email, password });
+  if (response.statusCode !== 201) {
     const passwordHash = await hashPassword(password);
     await User.updateOne({ email }, { passwordHash });
   }

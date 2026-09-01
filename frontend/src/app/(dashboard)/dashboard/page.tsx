@@ -13,6 +13,7 @@ import {
 import { Card, CardHeader } from "@/components/ui/card";
 import { PageSkeleton } from "@/components/ui/skeleton";
 import { PriorityBadge, StatusBadge } from "@/components/ui/badge";
+import { DailyAttendanceCard } from "@/components/attendance/daily-attendance-card";
 import { listDocuments } from "@/lib/api/documents.api";
 import { listEmployees } from "@/lib/api/employees.api";
 import { listProjects } from "@/lib/api/projects.api";
@@ -169,6 +170,8 @@ export default function DashboardPage() {
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
       </div>
+
+      <DailyAttendanceCard prominent showViewLink />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => (

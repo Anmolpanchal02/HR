@@ -23,6 +23,19 @@ export async function listMyLeaveRequests(params: {
   return apiClient.get(`/leave/requests/me${q ? `?${q}` : ""}`, true);
 }
 
+export async function listAllLeaveRequests(params: {
+  page?: number;
+  limit?: number;
+  status?: string;
+} = {}): Promise<LeaveApiResponse<{ requests: LeaveRequest[]; pagination: PaginationMeta }>> {
+  const sp = new URLSearchParams();
+  if (params.page) sp.set("page", String(params.page));
+  if (params.limit) sp.set("limit", String(params.limit));
+  if (params.status) sp.set("status", params.status);
+  const q = sp.toString();
+  return apiClient.get(`/leave/requests${q ? `?${q}` : ""}`, true);
+}
+
 export async function listPendingLeaveRequests(params: {
   page?: number;
   limit?: number;

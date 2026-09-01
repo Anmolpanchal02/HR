@@ -56,7 +56,6 @@ export async function listLeaveRequests(
 
 export async function listPendingForApprover(
   organizationId: string,
-  approverEmployeeId: string,
   directReportEmployeeIds: string[],
   params: LeaveQueryParams,
 ): Promise<{ requests: ILeaveRequest[]; total: number }> {
@@ -64,15 +63,14 @@ export async function listPendingForApprover(
   const limit = Math.min(Math.max(params.limit ?? 20, 1), 100);
   const skip = (page - 1) * limit;
 
-  const scopeFilter: FilterQuery<ILeaveRequest>[] = [{ approverId: approverEmployeeId }];
-  if (directReportEmployeeIds.length > 0) {
-    scopeFilter.push({ employeeId: { $in: directReportEmployeeIds } });
+  if (directReportEmployeeIds.length === 0) {
+    return { requests: [], total: 0 };
   }
 
   const filter: FilterQuery<ILeaveRequest> = {
     organizationId,
     status: "PENDING" as LeaveStatus,
-    $or: scopeFilter,
+    employeeId: { $in: directReportEmployeeIds },
   };
 
   const [requests, total] = await Promise.all([

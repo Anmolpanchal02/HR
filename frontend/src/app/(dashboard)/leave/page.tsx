@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
 import { PageSkeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { useCrmSessionRefresh } from "@/hooks/use-crm-session-refresh";
 import {
   approveLeaveRequest,
   cancelLeaveRequest,
   createLeaveRequest,
+  listAllLeaveRequests,
   listMyLeaveRequests,
   listPendingLeaveRequests,
   rejectLeaveRequest,
@@ -37,14 +39,99 @@ function statusBadge(status: LeaveRequest["status"]): string {
   }
 }
 
+function LeaveRequestTable({
+  requests,
+  showEmployee,
+  onApprove,
+  onReject,
+  onCancel,
+  emptyMessage,
+}: {
+  requests: LeaveRequest[];
+  showEmployee?: boolean;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
+  onCancel?: (id: string) => void;
+  emptyMessage: string;
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-left text-sm">
+        <thead>
+          <tr className="border-b border-border text-muted-foreground">
+            {showEmployee && <th className="py-2 pr-4">Employee</th>}
+            <th className="py-2 pr-4">Type</th>
+            <th className="py-2 pr-4">Dates</th>
+            <th className="py-2 pr-4">Days</th>
+            <th className="py-2 pr-4">Status</th>
+            {(onApprove || onReject || onCancel) && <th className="py-2">Actions</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {requests.length === 0 ? (
+            <tr>
+              <td
+                colSpan={showEmployee ? 6 : 5}
+                className="py-6 text-muted-foreground"
+              >
+                {emptyMessage}
+              </td>
+            </tr>
+          ) : (
+            requests.map((req) => (
+              <tr key={req.id} className="border-b border-border/60">
+                {showEmployee && <td className="py-2 pr-4">{req.employeeName}</td>}
+                <td className="py-2 pr-4">{req.leaveType}</td>
+                <td className="py-2 pr-4">
+                  {req.startDate} → {req.endDate}
+                </td>
+                <td className="py-2 pr-4">{req.totalDays}</td>
+                <td className="py-2 pr-4">
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${statusBadge(req.status)}`}>
+                    {req.status}
+                  </span>
+                </td>
+                {(onApprove || onReject || onCancel) && (
+                  <td className="py-2">
+                    <div className="flex flex-wrap gap-2">
+                      {onApprove && req.status === "PENDING" && (
+                        <Button size="sm" onClick={() => onApprove(req.id)}>
+                          Approve
+                        </Button>
+                      )}
+                      {onReject && req.status === "PENDING" && (
+                        <Button size="sm" variant="danger" onClick={() => onReject(req.id)}>
+                          Reject
+                        </Button>
+                      )}
+                      {onCancel && req.status === "PENDING" && (
+                        <Button size="sm" variant="ghost" onClick={() => onCancel(req.id)}>
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                )}
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function LeavePage() {
   const { user, refreshUser } = useAuth();
+  useCrmSessionRefresh();
   const userId = user?.id;
   const [myRequests, setMyRequests] = useState<LeaveRequest[]>([]);
   const [pending, setPending] = useState<LeaveRequest[]>([]);
+  const [allRequests, setAllRequests] = useState<LeaveRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [hrView, setHrView] = useState<"pending" | "all">("pending");
   const [form, setForm] = useState<CreateLeavePayload>({
     leaveType: "ANNUAL",
     startDate: "",
@@ -52,6 +139,7 @@ export default function LeavePage() {
     reason: "",
   });
 
+  const peopleOps = user ? isPeopleOpsRole(user.role) : false;
   const canSeePendingQueue = user ? canReviewLeave(user.role, user.hasDirectReports) : false;
 
   const fetchLeaveData = useCallback(async () => {
@@ -67,10 +155,17 @@ export default function LeavePage() {
       } else {
         setPending([]);
       }
+
+      if (peopleOps) {
+        const allRes = await listAllLeaveRequests({ limit: 30 });
+        setAllRequests(allRes.data.requests);
+      } else {
+        setAllRequests([]);
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to load leave requests");
     }
-  }, [userId, canSeePendingQueue]);
+  }, [userId, canSeePendingQueue, peopleOps]);
 
   useEffect(() => {
     if (!user || user.employeeId || user.role !== "EMPLOYEE") return;
@@ -142,13 +237,15 @@ export default function LeavePage() {
 
   if (!user || loading) return <PageSkeleton />;
 
+  const reviewList = peopleOps && hrView === "all" ? allRequests : pending;
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Leave"
         description={
           canSeePendingQueue
-            ? "Apply for leave and review pending team requests."
+            ? "Apply for leave and review team requests."
             : "Apply for leave and track your requests."
         }
       />
@@ -199,91 +296,82 @@ export default function LeavePage() {
               onChange={(e) => setForm({ ...form, reason: e.target.value })}
               required
             />
-            <Button type="submit" loading={submitting}>
+            <Button type="submit" loading={submitting} disabled={!user.employeeId}>
               Submit request
             </Button>
           </form>
         </Card>
 
-        {pending.length > 0 && (
+        {canSeePendingQueue && (
           <Card>
             <CardHeader
-              title="Pending approvals"
+              title={peopleOps ? "Leave management" : "Pending approvals"}
               description={
-                user && isPeopleOpsRole(user.role)
-                  ? "All pending leave in your organization"
+                peopleOps
+                  ? "Review pending requests or browse organization history"
                   : "Leave requests from your direct reports"
               }
-            />
-            <ul className="space-y-3">
-              {pending.map((req) => (
-                <li key={req.id} className="rounded-xl border border-border p-3 text-sm">
-                  <p className="font-medium text-foreground">{req.employeeName}</p>
-                  <p className="text-muted-foreground">
-                    {req.leaveType} · {req.startDate} → {req.endDate} ({req.totalDays} days)
-                  </p>
-                  <p className="mt-1 text-foreground">{req.reason}</p>
-                  <div className="mt-2 flex gap-2">
-                    <Button size="sm" onClick={() => void handleApprove(req.id)}>
-                      Approve
+              action={
+                peopleOps ? (
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant={hrView === "pending" ? "primary" : "secondary"}
+                      onClick={() => setHrView("pending")}
+                    >
+                      Pending
                     </Button>
-                    <Button size="sm" variant="danger" onClick={() => void handleReject(req.id)}>
-                      Reject
+                    <Button
+                      size="sm"
+                      variant={hrView === "all" ? "primary" : "secondary"}
+                      onClick={() => setHrView("all")}
+                    >
+                      All
                     </Button>
                   </div>
-                </li>
-              ))}
-            </ul>
+                ) : undefined
+              }
+            />
+            {peopleOps && hrView === "all" ? (
+              <LeaveRequestTable
+                requests={reviewList}
+                showEmployee
+                emptyMessage="No leave requests in the organization yet."
+              />
+            ) : reviewList.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No pending leave requests.</p>
+            ) : (
+              <ul className="space-y-3">
+                {reviewList.map((req) => (
+                  <li key={req.id} className="rounded-xl border border-border p-3 text-sm">
+                    <p className="font-medium text-foreground">{req.employeeName}</p>
+                    <p className="text-muted-foreground">
+                      {req.leaveType} · {req.startDate} → {req.endDate} ({req.totalDays} days)
+                    </p>
+                    <p className="mt-1 text-foreground">{req.reason}</p>
+                    <div className="mt-2 flex gap-2">
+                      <Button size="sm" onClick={() => void handleApprove(req.id)}>
+                        Approve
+                      </Button>
+                      <Button size="sm" variant="danger" onClick={() => void handleReject(req.id)}>
+                        Reject
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Card>
         )}
       </div>
 
       <Card>
         <CardHeader title="My leave history" />
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-border text-muted-foreground">
-                <th className="py-2 pr-4">Type</th>
-                <th className="py-2 pr-4">Dates</th>
-                <th className="py-2 pr-4">Days</th>
-                <th className="py-2 pr-4">Status</th>
-                <th className="py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {myRequests.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-6 text-muted-foreground">
-                    No leave requests yet.
-                  </td>
-                </tr>
-              ) : (
-                myRequests.map((req) => (
-                  <tr key={req.id} className="border-b border-border/60">
-                    <td className="py-2 pr-4">{req.leaveType}</td>
-                    <td className="py-2 pr-4">
-                      {req.startDate} → {req.endDate}
-                    </td>
-                    <td className="py-2 pr-4">{req.totalDays}</td>
-                    <td className="py-2 pr-4">
-                      <span className={`rounded-full px-2 py-0.5 text-xs ${statusBadge(req.status)}`}>
-                        {req.status}
-                      </span>
-                    </td>
-                    <td className="py-2">
-                      {req.status === "PENDING" && (
-                        <Button size="sm" variant="ghost" onClick={() => void handleCancel(req.id)}>
-                          Cancel
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <LeaveRequestTable
+          requests={myRequests}
+          onCancel={(id) => void handleCancel(id)}
+          emptyMessage="No leave requests yet."
+        />
       </Card>
     </div>
   );

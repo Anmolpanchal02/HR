@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api/client";
 import type {
   ApiDataResponse,
   CreateEmployeePayload,
+  CreateEmployeeResult,
   EmployeeListItem,
   EmployeeListParams,
   EmployeeProfile,
@@ -35,8 +36,15 @@ export async function getEmployee(
 
 export async function createEmployee(
   payload: CreateEmployeePayload,
-): Promise<ApiDataResponse<{ employee: EmployeeProfile }>> {
+): Promise<ApiDataResponse<CreateEmployeeResult>> {
   return apiClient.post("/employees", payload, true);
+}
+
+export async function resetEmployeePassword(
+  id: string,
+  payload: { password?: string } = {},
+): Promise<ApiDataResponse<{ email: string; temporaryPassword: string }>> {
+  return apiClient.post(`/employees/${id}/reset-password`, payload, true);
 }
 
 export async function updateEmployeeStatus(

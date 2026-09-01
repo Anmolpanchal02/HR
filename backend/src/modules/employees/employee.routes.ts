@@ -9,6 +9,7 @@ import {
   getEmployee,
   getOrgChart,
   listEmployees,
+  resetEmployeePassword,
   updateEmployee,
   updateEmployeeStatus,
 } from "./employee.controller.js";
@@ -17,6 +18,7 @@ import {
   employeeIdParamsSchema,
   errorResponseSchema,
   listEmployeesQuerySchema,
+  resetEmployeePasswordBodySchema,
   updateEmployeeBodySchema,
   updateEmployeeStatusBodySchema,
 } from "./employee.schema.js";
@@ -55,6 +57,24 @@ export async function employeeRoutes(app: FastifyInstance): Promise<void> {
       },
     },
     createEmployee,
+  );
+
+  app.post(
+    "/:id/reset-password",
+    {
+      preHandler: adminOrHr,
+      schema: {
+        params: employeeIdParamsSchema,
+        body: resetEmployeePasswordBodySchema,
+        response: {
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+        },
+      },
+    },
+    resetEmployeePassword,
   );
 
   app.get(

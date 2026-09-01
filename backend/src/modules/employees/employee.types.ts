@@ -33,6 +33,11 @@ export interface EmployeeProfile {
   updatedAt: string;
 }
 
+export interface CreateEmployeeResult {
+  employee: EmployeeProfile;
+  temporaryPassword: string;
+}
+
 export interface EmployeeListItem {
   id: string;
   employeeCode: string;
